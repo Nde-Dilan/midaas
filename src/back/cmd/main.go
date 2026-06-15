@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MiltonJ23/Midaas/internal/adapters/email"
 	"github.com/MiltonJ23/Midaas/internal/adapters/memory"
 	"github.com/MiltonJ23/Midaas/internal/adapters/postgres"
 	"github.com/MiltonJ23/Midaas/internal/adapters/storage"
@@ -12,15 +13,16 @@ import (
 	"github.com/MiltonJ23/Midaas/internal/endpoints/handler"
 	"github.com/MiltonJ23/Midaas/internal/endpoints/router"
 	"github.com/MiltonJ23/Midaas/internal/logger"
-	authsvc "github.com/MiltonJ23/Midaas/internal/services/auth"
+	authsvc 	"github.com/MiltonJ23/Midaas/internal/services/auth"
 )
 
 func main() {
 	log := logger.New(env("LOG_LEVEL", "debug"))
 
-	userRepo, entrepRepo := initRepos(log)
-
 	objStorage := initStorage(log)
+	initEmail(log)
+
+	userRepo, entrepRepo := initRepos(log)
 
 	authService := authsvc.NewAuthService(userRepo, entrepRepo)
 
@@ -103,6 +105,37 @@ func initStorage(log *slog.Logger) contracts.ObjectStorageService {
 		uploadPath,
 		env("UPLOAD_BASE_URL", "http://localhost:8080/uploads"),
 	)
+}
+
+func initEmail(log *slog.Logger) contracts.EmailService {
+	host := os.Getenv("SMTP_HOST")
+	port := os.Getenv("SMTP_PORT")
+	username := os.Getenv("SMTP_USERNAME")
+	password := os.Getenv("SMTP_PASSWORD")
+	from := os.Getenv("SMTP_FROM")
+
+	if host != "" && username != "" && password != "" {
+		if port == "" {
+			port = "587"
+		}
+		if from == "" {
+			from = "noreply@midaas.com"
+		}
+		log.Info("email: using SMTP",
+			slog.String("host", host),
+			slog.String("from", from),
+		)
+		return email.NewSMTPAdapter(email.SMTPConfig{
+			Host:     host,
+			Port:     port,
+			Username: username,
+			Password: password,
+			From:     from,
+		})
+	}
+
+	log.Info("email: using log adapter (set SMTP_HOST to send real emails)")
+	return email.NewLogAdapter()
 }
 
 func env(key, fallback string) string {
