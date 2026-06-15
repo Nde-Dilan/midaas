@@ -8,17 +8,15 @@ import (
 )
 
 type RegisterInput struct {
-	Email       string
-	PhoneNumber string
-	Password    string
-	FullName    string
-	IdCardUrl   string
-	IdCardNumber string
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+	FullName    string `json:"full_name"`
 }
 
 type LoginInput struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type AuthOutput struct {
@@ -26,8 +24,15 @@ type AuthOutput struct {
 	Token string
 }
 
+type UserProfile struct {
+	User         *domain.User         `json:"user"`
+	IsEntrepreneur bool                `json:"is_entrepreneur"`
+	Entrepreneur *domain.Entrepreneur `json:"entrepreneur,omitempty"`
+}
+
 type AuthService interface {
 	Register(ctx context.Context, input RegisterInput) (*domain.User, error)
 	Login(ctx context.Context, input LoginInput) (*AuthOutput, error)
+	GetProfile(ctx context.Context, userID uuid.UUID) (*UserProfile, error)
 	BecomeEntrepreneur(ctx context.Context, userID uuid.UUID) (*domain.Entrepreneur, error)
 }
