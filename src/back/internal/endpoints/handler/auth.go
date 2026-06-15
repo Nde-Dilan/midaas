@@ -61,9 +61,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if h.notifSvc != nil {
+		email := user.Email
+		name := user.FullName
 		go func() {
-			if err := h.notifSvc.SendRegistrationConfirmation(ctx, user.Email, user.FullName); err != nil {
-				logger.Error(ctx, "handler: failed to send welcome email",
+			if err := h.notifSvc.SendRegistrationConfirmation(context.Background(), email, name); err != nil {
+				logger.Error(context.Background(), "handler: failed to send welcome email",
+					slog.String("email", email),
 					slog.String("error", err.Error()),
 				)
 			}
