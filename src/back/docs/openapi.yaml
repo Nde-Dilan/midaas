@@ -1,0 +1,459 @@
+openapi: "3.0.3"
+info:
+  title: Midaas API
+  description: |
+    Plateforme d'investissement dans des initiatives d'entreprises.
+
+    ## Auth
+
+    Tous les endpoints proteges attendent un header:
+
+        Authorization: Bearer <jwt_token>
+
+    Le token est obtenu via `POST /auth/login`. Sans `JWT_SECRET` defini,
+    un token simple (`hex.user_id`) est emis — le middleware le parse
+    automatiquement.
+
+    ## Enveloppe
+
+    Toutes les reponses JSON suivent le format:
+
+    ```json
+    { "success": true, "data": {...} }
+    { "success": false, "error": "message" }
+    ```
+
+  version: "1.0.0"
+  contact:
+    name: Midaas
+    email: dev@midaas.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local dev
+
+paths:
+
+  /health:
+    get:
+      summary: Health check
+      tags: [system]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /auth/register:
+    post:
+      summary: Creer un compte utilisateur
+      description: |
+        Le mot de passe doit faire >= 8 caracteres.
+        `id_card_url` et `id_card_number` sont optionnels.
+        L'ID card peut etre uploadee plus tard via `POST /upload/id-card`.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, full_name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: jane@exemple.cm
+                password:
+                  type: string
+                  minLength: 8
+                  example: s3cur3p4ss
+                full_name:
+                  type: string
+                  example: Jane Doe
+                phone_number:
+                  type: string
+                  example: "+237690000000"
+                id_card_url:
+                  type: string
+                  format: uri
+                  example: "https://res.cloudinary.com/.../id_front.jpg"
+                id_card_number:
+                  type: string
+                  example: "115789123"
+      responses:
+        "201":
+          description: Compte cree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  email: "jane@exemple.cm"
+                  phone_number: "+237690000000"
+                  full_name: "Jane Doe"
+                  id_card_url: ""
+                  id_card_back_url: ""
+                  id_card_number: ""
+                  created_at: "2026-06-15T12:00:00Z"
+                  updated_at: "2026-06-15T12:00:00Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email deja utilise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "email already registered"
+
+  /auth/login:
+    post:
+      summary: Authentifier un utilisateur
+      description: |
+        Retourne un token JWT a passer dans le header `Authorization: Bearer <token>`
+        pour tous les endpoints proteges.
+
+        Le hash du mot de passe est compare en temps constant meme quand
+        l'email n'existe pas (dummyhash), pour empecher l'enumeration de comptes.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: jane@exemple.cm
+                password:
+                  type: string
+                  example: s3cur3p4ss
+      responses:
+        "200":
+          description: Authentifie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    email: "jane@exemple.cm"
+                    phone_number: "+237690000000"
+                    full_name: "Jane Doe"
+                    id_card_url: "https://res.cloudinary.com/.../id_front.jpg"
+                    id_card_back_url: "https://res.cloudinary.com/.../id_back.jpg"
+                    id_card_number: "115789123"
+                    created_at: "2026-06-15T12:00:00Z"
+                    updated_at: "2026-06-15T12:00:00Z"
+                  token: "eyJhbGciOiJIUzI1NiIs... .eyJzdWIiOiI1NTBl... .signature"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Identifiants invalides (message identique que l'email existe ou pas)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "invalid email or password"
+
+  /auth/me:
+    get:
+      summary: Profil de l'utilisateur connecte
+      description: Retourne les infos utilisateur et le statut entrepreneur (si applicable).
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    email: "jane@exemple.cm"
+                    phone_number: "+237690000000"
+                    full_name: "Jane Doe"
+                    id_card_url: "https://res.cloudinary.com/.../id_front.jpg"
+                    id_card_back_url: ""
+                    id_card_number: "115789123"
+                    created_at: "2026-06-15T12:00:00Z"
+                    updated_at: "2026-06-15T12:00:00Z"
+                  is_entrepreneur: true
+                  entrepreneur:
+                    id: "660e8400-e29b-41d4-a716-446655440001"
+                    user_id: "550e8400-e29b-41d4-a716-446655440000"
+                    status: "active"
+                    created_at: "2026-06-15T13:00:00Z"
+                    updated_at: "2026-06-15T13:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/entrepreneur:
+    post:
+      summary: Passer en mode entrepreneur
+      description: |
+        Cree un profil entrepreneur pour l'utilisateur connecte.
+        Le statut initial est `pending` — un admin doit valider.
+        Une seule demande par utilisateur. Rejete = definitif.
+      tags: [auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        description: Pas de body requis. Le endpoint utilise l'ID du token.
+      responses:
+        "201":
+          description: Profil entrepreneur cree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "660e8400-e29b-41d4-a716-446655440001"
+                  user_id: "550e8400-e29b-41d4-a716-446655440000"
+                  status: "pending"
+                  created_at: "2026-06-15T13:00:00Z"
+                  updated_at: "2026-06-15T13:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Candidature deja rejetee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "entrepreneur application was rejected"
+        "409":
+          description: Deja entrepreneur
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "already registered as entrepreneur"
+
+  /upload/id-card:
+    post:
+      summary: Uploader la photo recto/verso de la CNI
+      description: |
+        Multipart form. Envoie les photos a Cloudinary (si configure) ou
+        au stockage local. Accepte JPEG, PNG, WebP, PDF. Max 10 MB.
+
+        Au moins un des deux champs (`front` ou `back`) est requis.
+        On peut envoyer les deux en une requete, ou une seule et rappeler
+        l'endpoint pour la seconde.
+      tags: [upload]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                front:
+                  type: string
+                  format: binary
+                  description: Photo recto de la CNI/passeport
+                back:
+                  type: string
+                  format: binary
+                  description: Photo verso de la CNI/passeport
+      responses:
+        "200":
+          description: Upload(s) reussi(s)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                both:
+                  summary: Recto + verso
+                  value:
+                    success: true
+                    data:
+                      front_url: "https://res.cloudinary.com/.../users/550e.../id_card_front.jpg"
+                      back_url: "https://res.cloudinary.com/.../users/550e.../id_card_back.jpg"
+                frontOnly:
+                  summary: Recto seulement
+                  value:
+                    success: true
+                    data:
+                      front_url: "https://res.cloudinary.com/.../users/550e.../id_card_front.jpg"
+        "400":
+          description: Aucun fichier ou type non autorise
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                noFile:
+                  value:
+                    success: false
+                    error: "at least one photo is required (front or back)"
+                badType:
+                  value:
+                    success: false
+                    error: "file type not allowed; accepted: jpeg, png, webp, pdf"
+                tooLarge:
+                  value:
+                    success: false
+                    error: "file too large, max 10MB"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenu via `POST /auth/login`
+
+  schemas:
+
+    Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          description: Payload specifique a l'endpoint
+        meta:
+          description: Metadonnees de pagination (quand applicable)
+          type: object
+          properties:
+            total:
+              type: integer
+            page:
+              type: integer
+            page_size:
+              type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        phone_number:
+          type: string
+        full_name:
+          type: string
+        id_card_url:
+          type: string
+          format: uri
+        id_card_back_url:
+          type: string
+          format: uri
+        id_card_number:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Entrepreneur:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, active, rejected, suspended]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        is_entrepreneur:
+          type: boolean
+        entrepreneur:
+          $ref: "#/components/schemas/Entrepreneur"
+
+  responses:
+
+    BadRequest:
+      description: Requete invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "invalid request body"
+
+    Unauthorized:
+      description: Token manquant ou invalide
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "invalid or expired token"
+
+tags:
+  - name: auth
+    description: Authentification et gestion du profil
+  - name: upload
+    description: Upload de fichiers (CNI, documents)
+  - name: system
+    description: Health check
