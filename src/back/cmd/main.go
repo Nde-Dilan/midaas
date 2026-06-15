@@ -88,15 +88,12 @@ func initStorage(log *slog.Logger) contracts.ObjectStorageService {
 }
 
 func initEmail(log *slog.Logger) contracts.EmailService {
-	cfg := email.SMTPConfig{
-		Host:     require("SMTP_HOST"),
-		Port:     requireOr("SMTP_PORT", "587"),
-		Username: require("SMTP_USERNAME"),
-		Password: require("SMTP_PASSWORD"),
-		From:     requireOr("SMTP_FROM", "noreply@midaas.com"),
+	cfg := email.BrevoConfig{
+		APIKey: require("SMTP_PASSWORD"),
+		From:   requireOr("SMTP_FROM", "noreply@midaas.com"),
 	}
-	log.Info("email: SMTP configured", slog.String("host", cfg.Host))
-	return email.NewSMTPAdapter(cfg)
+	log.Info("email: Brevo API configured")
+	return email.NewBrevoAdapter(cfg)
 }
 
 func require(key string) string {
