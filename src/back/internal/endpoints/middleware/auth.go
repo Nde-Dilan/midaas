@@ -2,10 +2,13 @@ package middleware
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/MiltonJ23/Midaas/internal/endpoints/handler"
+	"github.com/MiltonJ23/Midaas/internal/logger"
+	authsvc "github.com/MiltonJ23/Midaas/internal/services/auth"
 )
 
 func AuthRequired(next http.Handler) http.Handler {
@@ -16,15 +19,30 @@ func AuthRequired(next http.Handler) http.Handler {
 			return
 		}
 
-		userID, err := parseSimpleToken(token)
+		userID, err := validateToken(token)
 		if err != nil {
-			handler.JSONError(w, http.StatusUnauthorized, "invalid token")
+			logger.Warn(r.Context(), "middleware: invalid token",
+				slog.String("error", err.Error()),
+			)
+			handler.JSONError(w, http.StatusUnauthorized, "invalid or expired token")
 			return
 		}
 
 		ctx := context.WithValue(r.Context(), handler.UserIDKey, userID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func validateToken(token string) (string, error) {
+	validator := authsvc.NewSupabaseJWTValidator()
+	if validator != nil {
+		userID, _, err := validator.Validate(token)
+		if err == nil {
+			return userID.String(), nil
+		}
+	}
+
+	return parseSimpleToken(token)
 }
 
 func extractToken(r *http.Request) string {
