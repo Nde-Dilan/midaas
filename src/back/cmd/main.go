@@ -89,7 +89,7 @@ func initStorage(log *slog.Logger) contracts.ObjectStorageService {
 
 func initEmail(log *slog.Logger) contracts.EmailService {
 	cfg := email.BrevoConfig{
-		APIKey: require("SMTP_PASSWORD"),
+		APIKey: require("BREVO_API_KEY"),
 		From:   requireOr("SMTP_FROM", "noreply@midaas.com"),
 	}
 	log.Info("email: Brevo API configured")
