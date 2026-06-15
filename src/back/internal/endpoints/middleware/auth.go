@@ -11,6 +11,12 @@ import (
 	authsvc "github.com/MiltonJ23/Midaas/internal/services/auth"
 )
 
+var jwtValidator *authsvc.JWTService
+
+func init() {
+	jwtValidator = authsvc.NewJWTService()
+}
+
 func AuthRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := extractToken(r)
@@ -34,12 +40,12 @@ func AuthRequired(next http.Handler) http.Handler {
 }
 
 func validateToken(token string) (string, error) {
-	validator := authsvc.NewSupabaseJWTValidator()
-	if validator != nil {
-		userID, _, err := validator.Validate(token)
+	if jwtValidator != nil {
+		userID, _, err := jwtValidator.Validate(token)
 		if err == nil {
 			return userID.String(), nil
 		}
+		return "", err
 	}
 
 	return parseSimpleToken(token)
