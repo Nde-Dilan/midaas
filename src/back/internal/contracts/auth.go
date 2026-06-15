@@ -12,6 +12,8 @@ type RegisterInput struct {
 	PhoneNumber string `json:"phone_number"`
 	Password    string `json:"password"`
 	FullName    string `json:"full_name"`
+	IdCardUrl   string `json:"id_card_url,omitempty"`
+	IdCardNumber string `json:"id_card_number,omitempty"`
 }
 
 type LoginInput struct {
