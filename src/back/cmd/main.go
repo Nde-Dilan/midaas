@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,11 +11,14 @@ import (
 	redisadapter "github.com/MiltonJ23/Midaas/internal/adapters/redis"
 	"github.com/MiltonJ23/Midaas/internal/adapters/storage"
 	"github.com/MiltonJ23/Midaas/internal/contracts"
+	"github.com/MiltonJ23/Midaas/internal/domain"
 	"github.com/MiltonJ23/Midaas/internal/endpoints/handler"
 	"github.com/MiltonJ23/Midaas/internal/endpoints/router"
 	"github.com/MiltonJ23/Midaas/internal/logger"
+	adminsvc "github.com/MiltonJ23/Midaas/internal/services/admin"
 	authsvc "github.com/MiltonJ23/Midaas/internal/services/auth"
 	notifsvc "github.com/MiltonJ23/Midaas/internal/services/notification"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -32,6 +36,7 @@ func main() {
 	userRepo := postgres.NewUserRepository(db)
 	entrepRepo := postgres.NewEntrepreneurRepository(db)
 	companyRepo := postgres.NewCompanyRepository(db)
+	adminRepo := postgres.NewAdminRepository(db)
 
 	authService := authsvc.NewAuthService(userRepo, entrepRepo)
 
@@ -44,11 +49,16 @@ func main() {
 		requireOr("SMTP_FROM", "noreply@midaas.com"),
 	)
 
+	adminService := adminsvc.NewAdminService(adminRepo, companyRepo, entrepRepo, userRepo)
+
 	authHandler := handler.NewAuthHandler(authService, notifSvc)
 	uploadHandler := handler.NewUploadHandler(objStorage, userRepo)
 	companyHandler := handler.NewCompanyHandler(companyRepo, entrepRepo, objStorage)
+	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo)
 
-	apiRouter := router.New(log, authHandler, uploadHandler, companyHandler, entrepRepo)
+	seedAdmin(log, adminRepo, authsvc.NewPasswordHasher())
+
+	apiRouter := router.New(log, authHandler, uploadHandler, companyHandler, adminHandler, entrepRepo)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", apiRouter)
@@ -120,6 +130,43 @@ func initRedis(log *slog.Logger) *redis.Client {
 	}
 	log.Info("redis: connected")
 	return client
+}
+
+func seedAdmin(log *slog.Logger, adminRepo contracts.AdminRepository, hasher *authsvc.PasswordHasher) {
+	email := os.Getenv("ADMIN_EMAIL")
+	password := os.Getenv("ADMIN_PASSWORD")
+	if email == "" || password == "" {
+		log.Info("admin: no ADMIN_EMAIL/ADMIN_PASSWORD set, skipping seed")
+		return
+	}
+
+	ctx := context.Background()
+	_, err := adminRepo.FindByEmail(ctx, email)
+	if err == nil {
+		log.Info("admin: already exists", slog.String("email", email))
+		return
+	}
+
+	hashed, err := hasher.Hash(password)
+	if err != nil {
+		log.Error("admin: seed failed", slog.String("error", err.Error()))
+		return
+	}
+
+	admin := &domain.Admin{
+		ID:           uuid.New(),
+		Email:        email,
+		HashPassword: hashed,
+		FullName:     "Admin",
+		Role:         domain.AdminRoleSuperAdmin,
+	}
+
+	if err := adminRepo.Create(ctx, admin); err != nil {
+		log.Error("admin: seed failed", slog.String("error", err.Error()))
+		return
+	}
+
+	log.Info("admin: seeded", slog.String("email", email))
 }
 
 func require(key string) string {
