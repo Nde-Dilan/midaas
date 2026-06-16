@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/MiltonJ23/Midaas/internal/adapters/email"
+	"github.com/MiltonJ23/Midaas/internal/adapters/pawapay"
 	"github.com/MiltonJ23/Midaas/internal/adapters/postgres"
 	redisadapter "github.com/MiltonJ23/Midaas/internal/adapters/redis"
 	"github.com/MiltonJ23/Midaas/internal/adapters/storage"
@@ -52,12 +53,14 @@ func main() {
 
 	adminService := adminsvc.NewAdminService(adminRepo, companyRepo, entrepRepo, userRepo)
 
+	pawaPayClient := initPawaPay(log)
+
 	authHandler := handler.NewAuthHandler(authService, notifSvc)
 	uploadHandler := handler.NewUploadHandler(objStorage, userRepo)
 	companyHandler := handler.NewCompanyHandler(companyRepo, entrepRepo, objStorage)
-	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo, companyRepo, projectRepo, milestoneRepo, notifSvc)
+	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo, companyRepo, projectRepo, milestoneRepo, transactionRepo, notifSvc)
 	projectHandler := handler.NewProjectHandler(projectRepo, milestoneRepo, investmentRepo, transactionRepo, companyRepo, entrepRepo, userRepo, objStorage, notifSvc)
-	investmentHandler := handler.NewInvestmentHandler(investmentRepo, projectRepo, userRepo, notifSvc)
+	investmentHandler := handler.NewInvestmentHandler(investmentRepo, projectRepo, userRepo, transactionRepo, notifSvc, pawaPayClient)
 
 	seedAdmin(log, adminRepo, authsvc.NewPasswordHasher())
 	worker.StartAutoCancel(projectRepo, investmentRepo, transactionRepo, log)
@@ -166,6 +169,17 @@ func seedAdmin(log *slog.Logger, adminRepo contracts.AdminRepository, hasher *au
 	}
 
 	log.Info("admin: seeded", slog.String("email", email))
+}
+
+func initPawaPay(log *slog.Logger) *pawapay.Client {
+	url := os.Getenv("PAWAPAY_BASE_URL")
+	token := os.Getenv("PAWAPAY_TOKEN")
+	if url == "" || token == "" {
+		log.Warn("pawapay: not configured, payment integration disabled")
+		return nil
+	}
+	log.Info("pawapay: configured", slog.String("base_url", url))
+	return pawapay.New(pawapay.Config{BaseURL: url, Token: token})
 }
 
 func require(key string) string {

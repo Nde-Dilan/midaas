@@ -63,6 +63,7 @@ func New(
 	mux.Handle("POST /api/v1/projects/{id}/invest", middleware.AuthRequired(http.HandlerFunc(investmentHandler.Invest)))
 	mux.Handle("GET /api/v1/projects/{id}/investors", middleware.AuthRequired(http.HandlerFunc(investmentHandler.ListProjectInvestors)))
 	mux.Handle("GET /api/v1/investments/my", middleware.AuthRequired(http.HandlerFunc(investmentHandler.ListMyInvestments)))
+	mux.Handle("GET /api/v1/transactions/my", middleware.AuthRequired(http.HandlerFunc(investmentHandler.MyTransactions)))
 
 	mux.HandleFunc("POST /api/v1/admin/login", adminHandler.Login)
 	mux.Handle("GET /api/v1/admin/me", middleware.AdminRequired(http.HandlerFunc(adminHandler.Me)))
@@ -78,7 +79,7 @@ func New(
 	mux.Handle("POST /api/v1/admin/projects/{id}/reject", middleware.AdminRequired(http.HandlerFunc(adminHandler.RejectProject)))
 	mux.Handle("GET /api/v1/admin/milestones/pending", middleware.AdminRequired(http.HandlerFunc(adminHandler.ListPendingMilestones)))
 	mux.Handle("POST /api/v1/admin/milestones/{id}/approve", middleware.AdminRequired(http.HandlerFunc(adminHandler.ApproveMilestone)))
-	mux.Handle("POST /api/v1/admin/milestones/{id}/reject", middleware.AdminRequired(http.HandlerFunc(adminHandler.RejectMilestone)))
+	mux.Handle("GET /api/v1/admin/transactions", middleware.AdminRequired(http.HandlerFunc(adminHandler.ListTransactions)))
 
 	var h http.Handler = mux
 	h = middleware.CORS(h)

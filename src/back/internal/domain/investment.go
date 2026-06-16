@@ -14,16 +14,20 @@ const (
 )
 
 type Investment struct {
-	ID             uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
-	ProjectID      uuid.UUID `gorm:"type:uuid;not null;index" json:"project_id"`
-	UserID         uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
-	Amount         float64   `gorm:"not null" json:"amount"`
-	Currency       string    `gorm:"not null" json:"currency"`
-	OwnershipPct   float64   `json:"ownership_pct"`
-	Status         string    `gorm:"not null;default:pending" json:"status"`
-	TransactionRef string    `json:"transaction_ref"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID               uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
+	ProjectID        uuid.UUID `gorm:"type:uuid;not null;index" json:"project_id"`
+	UserID           uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
+	Amount           float64   `gorm:"not null" json:"amount"`
+	Currency         string    `gorm:"not null" json:"currency"`
+	OwnershipPct     float64   `json:"ownership_pct"`
+	PlatformFeePct   float64   `gorm:"default:5" json:"platform_fee_pct"`
+	PlatformFeeAmt   float64   `gorm:"default:0" json:"platform_fee_amt"`
+	NetAmount        float64   `gorm:"default:0" json:"net_amount"`
+	Status           string    `gorm:"not null;default:pending" json:"status"`
+	TransactionRef   string    `json:"transaction_ref"`
+	DepositID        string    `json:"deposit_id"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 
 	Project Project `gorm:"foreignKey:ProjectID" json:"project,omitempty"`
 	User    User    `gorm:"foreignKey:UserID" json:"user,omitempty"`

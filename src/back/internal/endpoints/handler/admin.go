@@ -21,14 +21,15 @@ type adminCtxKey string
 const AdminIDKey adminCtxKey = "admin_id"
 
 type AdminHandler struct {
-	adminService   contracts.AdminService
-	adminRepo      contracts.AdminRepository
-	userRepo       contracts.UserRepository
-	entrepRepo     contracts.EntrepreneurRepository
-	companyRepo    contracts.CompanyRepository
-	projectRepo    contracts.ProjectRepository
-	milestoneRepo  contracts.MilestoneRepository
-	notifSvc       contracts.NotificationService
+	adminService    contracts.AdminService
+	adminRepo       contracts.AdminRepository
+	userRepo        contracts.UserRepository
+	entrepRepo      contracts.EntrepreneurRepository
+	companyRepo     contracts.CompanyRepository
+	projectRepo     contracts.ProjectRepository
+	milestoneRepo   contracts.MilestoneRepository
+	transactionRepo contracts.TransactionRepository
+	notifSvc        contracts.NotificationService
 }
 
 func NewAdminHandler(
@@ -39,17 +40,19 @@ func NewAdminHandler(
 	companyRepo contracts.CompanyRepository,
 	projectRepo contracts.ProjectRepository,
 	milestoneRepo contracts.MilestoneRepository,
+	transactionRepo contracts.TransactionRepository,
 	notifSvc contracts.NotificationService,
 ) *AdminHandler {
 	return &AdminHandler{
-		adminService:  adminService,
-		adminRepo:     adminRepo,
-		userRepo:      userRepo,
-		entrepRepo:    entrepRepo,
-		companyRepo:   companyRepo,
-		projectRepo:   projectRepo,
-		milestoneRepo: milestoneRepo,
-		notifSvc:      notifSvc,
+		adminService:    adminService,
+		adminRepo:       adminRepo,
+		userRepo:        userRepo,
+		entrepRepo:      entrepRepo,
+		companyRepo:     companyRepo,
+		projectRepo:     projectRepo,
+		milestoneRepo:   milestoneRepo,
+		transactionRepo: transactionRepo,
+		notifSvc:        notifSvc,
 	}
 }
 
@@ -353,8 +356,18 @@ func (h *AdminHandler) RejectMilestone(w http.ResponseWriter, r *http.Request) {
 	h.milestoneRepo.Update(ctx, milestone)
 
 	if h.notifSvc != nil {
-		go h.notifSvc.SendMilestoneRejected(context.Background(), milestone.ProjectID, id, body.Feedback)
+		go 		h.notifSvc.SendMilestoneRejected(context.Background(), milestone.ProjectID, id, body.Feedback)
 	}
 
 	JSON(w, http.StatusOK, milestone)
+}
+
+func (h *AdminHandler) ListTransactions(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	txns, _, err := h.transactionRepo.ListByUser(ctx, uuid.Nil, 1, 500)
+	if err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to list transactions")
+		return
+	}
+	JSON(w, http.StatusOK, txns)
 }
