@@ -35,7 +35,7 @@ type User struct {
 type Entrepreneur struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;uniqueIndex;not null" json:"user_id"`
-	Status    string    `gorm:"not null;default:pending" json:"status"`
+	Status    string    `gorm:"not null;default:active" json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 

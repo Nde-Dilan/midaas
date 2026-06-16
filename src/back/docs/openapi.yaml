@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: Midaas API
   description: |
-    Plateforme d'investissement dans des initiatives d'entreprises.
+    Plateforme d'investissement dans des entreprises reelles.
 
     ## Auth
 
@@ -10,25 +10,27 @@ info:
 
         Authorization: Bearer <jwt_token>
 
-    Le token est obtenu via `POST /auth/login`. Sans `JWT_SECRET` defini,
-    un token simple (`hex.user_id`) est emis — le middleware le parse
-    automatiquement.
+    Le token JWT (HS256) est obtenu via `POST /auth/login`, signe avec `JWT_SECRET`.
 
     ## Enveloppe
-
-    Toutes les reponses JSON suivent le format:
 
     ```json
     { "success": true, "data": {...} }
     { "success": false, "error": "message" }
     ```
 
-  version: "1.0.0"
+    ## CORS
+
+    Tous les endpoints acceptent le preflight `OPTIONS` → `204` avec headers CORS.
+
+  version: "1.1.0"
   contact:
     name: Midaas
     email: dev@midaas.com
 
 servers:
+  - url: https://midaas-production.up.railway.app/api/v1
+    description: Production (Railway)
   - url: http://localhost:8080/api/v1
     description: Local dev
 
@@ -54,9 +56,8 @@ paths:
     post:
       summary: Creer un compte utilisateur
       description: |
-        Le mot de passe doit faire >= 8 caracteres.
-        `id_card_url` et `id_card_number` sont optionnels.
-        L'ID card peut etre uploadee plus tard via `POST /upload/id-card`.
+        Mot de passe >= 8 caracteres. `id_card_url` et `id_card_number` optionnels.
+        Un email de bienvenue est envoye via Brevo en arriere-plan.
       tags: [auth]
       requestBody:
         required: true
@@ -83,10 +84,8 @@ paths:
                 id_card_url:
                   type: string
                   format: uri
-                  example: "https://res.cloudinary.com/.../id_front.jpg"
                 id_card_number:
                   type: string
-                  example: "115789123"
       responses:
         "201":
           description: Compte cree
@@ -122,11 +121,10 @@ paths:
     post:
       summary: Authentifier un utilisateur
       description: |
-        Retourne un token JWT a passer dans le header `Authorization: Bearer <token>`
-        pour tous les endpoints proteges.
+        Retourne un token JWT (HS256, 24h) a passer dans `Authorization: Bearer <token>`.
 
-        Le hash du mot de passe est compare en temps constant meme quand
-        l'email n'existe pas (dummyhash), pour empecher l'enumeration de comptes.
+        Anti-enumeration : dummyhash — comparaison en temps constant meme si
+        l'email n'existe pas. Message d'erreur identique dans tous les cas.
       tags: [auth]
       requestBody:
         required: true
@@ -156,18 +154,12 @@ paths:
                   user:
                     id: "550e8400-e29b-41d4-a716-446655440000"
                     email: "jane@exemple.cm"
-                    phone_number: "+237690000000"
                     full_name: "Jane Doe"
-                    id_card_url: "https://res.cloudinary.com/.../id_front.jpg"
-                    id_card_back_url: "https://res.cloudinary.com/.../id_back.jpg"
-                    id_card_number: "115789123"
-                    created_at: "2026-06-15T12:00:00Z"
-                    updated_at: "2026-06-15T12:00:00Z"
-                  token: "eyJhbGciOiJIUzI1NiIs... .eyJzdWIiOiI1NTBl... .signature"
+                  token: "eyJhbGciOiJIUzI1NiIs..."
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
-          description: Identifiants invalides (message identique que l'email existe ou pas)
+          description: Identifiants invalides (meme message que l'email existe ou pas)
           content:
             application/json:
               schema:
@@ -179,7 +171,7 @@ paths:
   /auth/me:
     get:
       summary: Profil de l'utilisateur connecte
-      description: Retourne les infos utilisateur et le statut entrepreneur (si applicable).
+      description: Infos utilisateur + statut entrepreneur (si applicable).
       tags: [auth]
       security:
         - bearerAuth: []
@@ -194,22 +186,16 @@ paths:
                 success: true
                 data:
                   user:
-                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    id: "550e8400-..."
                     email: "jane@exemple.cm"
-                    phone_number: "+237690000000"
                     full_name: "Jane Doe"
-                    id_card_url: "https://res.cloudinary.com/.../id_front.jpg"
-                    id_card_back_url: ""
-                    id_card_number: "115789123"
-                    created_at: "2026-06-15T12:00:00Z"
-                    updated_at: "2026-06-15T12:00:00Z"
+                    id_card_url: "https://res.cloudinary.com/.../front.jpg"
+                    id_card_back_url: "https://res.cloudinary.com/.../back.jpg"
                   is_entrepreneur: true
                   entrepreneur:
-                    id: "660e8400-e29b-41d4-a716-446655440001"
-                    user_id: "550e8400-e29b-41d4-a716-446655440000"
+                    id: "660e8400-..."
+                    user_id: "550e8400-..."
                     status: "active"
-                    created_at: "2026-06-15T13:00:00Z"
-                    updated_at: "2026-06-15T13:00:00Z"
         "401":
           $ref: "#/components/responses/Unauthorized"
 
@@ -217,15 +203,11 @@ paths:
     post:
       summary: Passer en mode entrepreneur
       description: |
-        Cree un profil entrepreneur pour l'utilisateur connecte.
-        Le statut initial est `pending` — un admin doit valider.
-        Une seule demande par utilisateur. Rejete = definitif.
+        Cree un profil entrepreneur avec le statut `active` directement.
+        La verification se fait au niveau des documents des companies soumises.
       tags: [auth]
       security:
         - bearerAuth: []
-      requestBody:
-        required: false
-        description: Pas de body requis. Le endpoint utilise l'ID du token.
       responses:
         "201":
           description: Profil entrepreneur cree
@@ -236,22 +218,13 @@ paths:
               example:
                 success: true
                 data:
-                  id: "660e8400-e29b-41d4-a716-446655440001"
-                  user_id: "550e8400-e29b-41d4-a716-446655440000"
-                  status: "pending"
+                  id: "660e8400-..."
+                  user_id: "550e8400-..."
+                  status: "active"
                   created_at: "2026-06-15T13:00:00Z"
                   updated_at: "2026-06-15T13:00:00Z"
         "401":
           $ref: "#/components/responses/Unauthorized"
-        "403":
-          description: Candidature deja rejetee
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                success: false
-                error: "entrepreneur application was rejected"
         "409":
           description: Deja entrepreneur
           content:
@@ -266,12 +239,8 @@ paths:
     post:
       summary: Uploader la photo recto/verso de la CNI
       description: |
-        Multipart form. Envoie les photos a Cloudinary (si configure) ou
-        au stockage local. Accepte JPEG, PNG, WebP, PDF. Max 10 MB.
-
-        Au moins un des deux champs (`front` ou `back`) est requis.
-        On peut envoyer les deux en une requete, ou une seule et rappeler
-        l'endpoint pour la seconde.
+        Multipart form. Stocke sur Cloudinary. JPEG, PNG, WebP, PDF. Max 10 MB.
+        Au moins un champ (`front` ou `back`) requis.
       tags: [upload]
       security:
         - bearerAuth: []
@@ -285,11 +254,11 @@ paths:
                 front:
                   type: string
                   format: binary
-                  description: Photo recto de la CNI/passeport
+                  description: Photo recto CNI/passeport
                 back:
                   type: string
                   format: binary
-                  description: Photo verso de la CNI/passeport
+                  description: Photo verso CNI/passeport
       responses:
         "200":
           description: Upload(s) reussi(s)
@@ -303,14 +272,14 @@ paths:
                   value:
                     success: true
                     data:
-                      front_url: "https://res.cloudinary.com/.../users/550e.../id_card_front.jpg"
-                      back_url: "https://res.cloudinary.com/.../users/550e.../id_card_back.jpg"
+                      front_url: "https://res.cloudinary.com/.../id_card_front.jpg"
+                      back_url: "https://res.cloudinary.com/.../id_card_back.jpg"
                 frontOnly:
                   summary: Recto seulement
                   value:
                     success: true
                     data:
-                      front_url: "https://res.cloudinary.com/.../users/550e.../id_card_front.jpg"
+                      front_url: "https://res.cloudinary.com/.../id_card_front.jpg"
         "400":
           description: Aucun fichier ou type non autorise
           content:
@@ -322,14 +291,333 @@ paths:
                   value:
                     success: false
                     error: "at least one photo is required (front or back)"
-                badType:
-                  value:
-                    success: false
-                    error: "file type not allowed; accepted: jpeg, png, webp, pdf"
                 tooLarge:
                   value:
                     success: false
                     error: "file too large, max 10MB"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /companies:
+    post:
+      summary: Creer un business
+      description: |
+        Reserver aux entrepreneurs actifs. Cree avec le statut `draft`.
+        A completer avec les documents et informations avant soumission.
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [legal_name, corporate_form]
+              properties:
+                legal_name:
+                  type: string
+                  example: "Societe Alpha SARL"
+                trade_name:
+                  type: string
+                  example: "Alpha Tech"
+                corporate_form:
+                  type: string
+                  enum: [ETS, SARL, SA, SAS]
+                  example: SARL
+                industry_sector:
+                  type: string
+                  example: Fintech
+                gps_coordinates:
+                  type: string
+                  example: "3.8480,11.5021"
+                physical_address:
+                  type: string
+                  example: "Rue 1234, Quartier Bastos, Yaounde"
+      responses:
+        "201":
+          description: Business cree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "770e8400-..."
+                  entrepreneur_id: "660e8400-..."
+                  status: "draft"
+                  legal_name: "Societe Alpha SARL"
+                  trade_name: "Alpha Tech"
+                  corporate_form: "SARL"
+                  industry_sector: "Fintech"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Compte entrepreneur non approuve
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "entrepreneur account is not yet approved"
+
+    get:
+      summary: Lister mes businesses
+      description: Retourne tous les businesses de l'entrepreneur connecte.
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des businesses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  - id: "770e8400-..."
+                    status: "approved"
+                    legal_name: "Societe Alpha SARL"
+                  - id: "880e8400-..."
+                    status: "draft"
+                    legal_name: "Beta ETS"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /companies/{id}:
+    get:
+      summary: Voir les details d'un business
+      description: Retourne le business avec toutes ses relations (legal docs, financials, owners, managers, operations, entrepreneur).
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Business detaille
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "770e8400-..."
+                  status: "approved"
+                  legal_name: "Societe Alpha SARL"
+                  legal_docs:
+                    rccm_number: "RCCM-2024-001"
+                    rccm_docs: ["https://res.cloudinary.com/..."]
+                  financials:
+                    dsf_years: [2024, 2025]
+                  beneficial_owners:
+                    - full_name: "Jean Dupont"
+                      equity_percentage: 60
+                  managers:
+                    - full_name: "Marie Curie"
+                      role: "Gerant"
+                  entrepreneur:
+                    id: "660e8400-..."
+                    user:
+                      full_name: "Jane Doe"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /companies/{id}/submit:
+    post:
+      summary: Soumettre un business pour validation
+      description: Passe le statut de `draft` a `pending`. Un admin doit valider.
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Business soumis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "770e8400-..."
+                  status: "pending"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /companies/{id}/upload:
+    post:
+      summary: Uploader des documents pour un business
+      description: |
+        Multipart form. Accepte plusieurs fichiers dans le champ `files`.
+        Le champ `category` (form value) specifie le type de document.
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files, category]
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Un ou plusieurs fichiers
+                category:
+                  type: string
+                  enum: [rccm, niu, statuts, premises, sector_permits, dsf, bank_statements, momo_statements, collateral, identity]
+                  description: Type de document
+      responses:
+        "200":
+          description: Uploads reussis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  urls:
+                    - "https://res.cloudinary.com/.../companies/770e.../rccm/abc.pdf"
+                    - "https://res.cloudinary.com/.../companies/770e.../rccm/def.pdf"
+                  category: "rccm"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /companies/public:
+    get:
+      summary: Lister les businesses approuves
+      description: Public — retourne les businesses `approved` avec filtrage et pagination.
+      tags: [companies]
+      parameters:
+        - name: industry_sector
+          in: query
+          schema:
+            type: string
+          example: Fintech
+        - name: corporate_form
+          in: query
+          schema:
+            type: string
+            enum: [ETS, SARL, SA, SAS]
+          example: SARL
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Recherche textuelle sur legal_name et trade_name
+          example: Alpha
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Liste des businesses approuves (paginee)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  - id: "770e8400-..."
+                    legal_name: "Societe Alpha SARL"
+                    trade_name: "Alpha Tech"
+                    corporate_form: "SARL"
+                    industry_sector: "Fintech"
+                    status: "approved"
+                meta:
+                  total: 42
+                  page: 1
+                  page_size: 20
+
+  /companies/{id}/reverify:
+    post:
+      summary: Demander la re-verification d'un business
+      description: |
+        Tout utilisateur authentifie peut signaler un business approuve pour
+        re-verification. Le statut passe a `reverify_requested` — visible par les admins.
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Demande enregistree
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  id: "770e8400-..."
+                  status: "reverify_requested"
+        "400":
+          description: Business non eligible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                success: false
+                error: "only approved companies can be flagged for reverify"
         "401":
           $ref: "#/components/responses/Unauthorized"
 
@@ -352,15 +640,8 @@ components:
         data:
           description: Payload specifique a l'endpoint
         meta:
-          description: Metadonnees de pagination (quand applicable)
+          description: Metadonnees de pagination
           type: object
-          properties:
-            total:
-              type: integer
-            page:
-              type: integer
-            page_size:
-              type: integer
 
     ErrorResponse:
       type: object
@@ -410,7 +691,39 @@ components:
           format: uuid
         status:
           type: string
-          enum: [pending, active, rejected, suspended]
+          enum: [active, suspended]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        entrepreneur_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [draft, pending, approved, rejected, reverify_requested]
+        legal_name:
+          type: string
+        trade_name:
+          type: string
+        corporate_form:
+          type: string
+          enum: [ETS, SARL, SA, SAS]
+        industry_sector:
+          type: string
+        gps_coordinates:
+          type: string
+        physical_address:
+          type: string
         created_at:
           type: string
           format: date-time
@@ -450,10 +763,22 @@ components:
             success: false
             error: "invalid or expired token"
 
+    Forbidden:
+      description: Acces refuse (role insuffisant)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "entrepreneur account is not yet approved"
+
 tags:
   - name: auth
-    description: Authentification et gestion du profil
+    description: Authentification et profil
   - name: upload
     description: Upload de fichiers (CNI, documents)
+  - name: companies
+    description: Gestion des businesses
   - name: system
     description: Health check

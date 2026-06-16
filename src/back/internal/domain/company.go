@@ -13,10 +13,11 @@ const (
 	CorporateFormSA   = "SA"
 	CorporateFormSAS  = "SAS"
 
-	CompanyStatusDraft   = "draft"
-	CompanyStatusPending = "pending"
+	CompanyStatusDraft    = "draft"
+	CompanyStatusPending  = "pending"
 	CompanyStatusApproved = "approved"
 	CompanyStatusRejected = "rejected"
+	CompanyStatusReverify = "reverify_requested"
 )
 
 type Company struct {

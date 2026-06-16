@@ -17,6 +17,14 @@ type CreateCompanyInput struct {
 	PhysicalAddress string
 }
 
+type CompanyFilter struct {
+	IndustrySector string
+	CorporateForm  string
+	Query          string
+	Page           int
+	PageSize       int
+}
+
 type CompanyService interface {
 	Create(ctx context.Context, input CreateCompanyInput) (*domain.Company, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*domain.Company, error)

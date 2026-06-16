@@ -147,15 +147,12 @@ func (h *AuthHandler) BecomeEntrepreneur(w http.ResponseWriter, r *http.Request)
 
 	entrepreneur, err := h.authService.BecomeEntrepreneur(ctx, userID)
 	if err != nil {
-		switch {
-		case errors.Is(err, authsvc.ErrAlreadyEntrepreneur):
+		if errors.Is(err, authsvc.ErrAlreadyEntrepreneur) {
 			JSONError(w, http.StatusConflict, "already registered as entrepreneur")
-		case errors.Is(err, authsvc.ErrEntrepreneurRejected):
-			JSONError(w, http.StatusForbidden, "entrepreneur application was rejected")
-		default:
-			logger.Error(ctx, "handler: become entrepreneur failed", slog.String("error", err.Error()))
-			JSONError(w, http.StatusInternalServerError, "failed to create entrepreneur profile")
+			return
 		}
+		logger.Error(ctx, "handler: become entrepreneur failed", slog.String("error", err.Error()))
+		JSONError(w, http.StatusInternalServerError, "failed to create entrepreneur profile")
 		return
 	}
 

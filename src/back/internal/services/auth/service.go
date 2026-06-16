@@ -13,11 +13,10 @@ import (
 )
 
 var (
-	ErrInvalidCredentials   = errors.New("invalid email or password")
-	ErrEmailAlreadyExists   = errors.New("email already registered")
-	ErrAlreadyEntrepreneur  = errors.New("user is already an entrepreneur")
-	ErrEntrepreneurRejected = errors.New("entrepreneur application was rejected")
-	ErrUserNotFound         = errors.New("user not found")
+	ErrInvalidCredentials  = errors.New("invalid email or password")
+	ErrEmailAlreadyExists  = errors.New("email already registered")
+	ErrAlreadyEntrepreneur = errors.New("user is already an entrepreneur")
+	ErrUserNotFound        = errors.New("user not found")
 )
 
 type authService struct {
@@ -126,16 +125,13 @@ func (s *authService) BecomeEntrepreneur(ctx context.Context, userID uuid.UUID) 
 
 	existing, err := s.entrepRepo.FindByUserID(ctx, userID)
 	if err == nil && existing != nil {
-		if existing.Status == domain.EntrepreneurStatusRejected {
-			return nil, ErrEntrepreneurRejected
-		}
 		return nil, ErrAlreadyEntrepreneur
 	}
 
 	entrepreneur := &domain.Entrepreneur{
 		ID:     uuid.New(),
 		UserID: userID,
-		Status: domain.EntrepreneurStatusPending,
+		Status: domain.EntrepreneurStatusActive,
 	}
 
 	if err := s.entrepRepo.Create(ctx, entrepreneur); err != nil {
@@ -143,6 +139,6 @@ func (s *authService) BecomeEntrepreneur(ctx context.Context, userID uuid.UUID) 
 		return nil, fmt.Errorf("internal error")
 	}
 
-	logger.Info(ctx, "auth: entrepreneur application submitted", slog.String("entrepreneur_id", entrepreneur.ID.String()))
+	logger.Info(ctx, "auth: entrepreneur activated", slog.String("entrepreneur_id", entrepreneur.ID.String()))
 	return entrepreneur, nil
 }
