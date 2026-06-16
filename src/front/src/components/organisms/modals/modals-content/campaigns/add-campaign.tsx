@@ -242,26 +242,44 @@ export default function AddCampaignModal() {
           />
 
           {/* Company (only in create mode) */}
-          {!isEditMode && companies.length > 0 && (
-            <Controller
-              name="companyId"
-              control={control}
-              rules={{ required: "Veuillez sélectionner une entreprise" }}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue placeholder="Sélectionner une entreprise" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.displayName} ({company.corporateForm})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          {!isEditMode && (
+            <div className="space-y-1">
+              <Controller
+                name="companyId"
+                control={control}
+                rules={{ required: "Veuillez sélectionner une entreprise" }}
+                render={({ field }) => (
+                  <>
+                    {companies.length > 0 ? (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Sélectionner une entreprise" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {companies.map((company) => (
+                            <SelectItem key={company.id} value={company.id}>
+                              {company.displayName} ({company.corporateForm})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="h-12 flex items-center px-3 rounded-md border border-input bg-white text-sm text-gray-400 cursor-not-allowed">
+                        Aucune entreprise disponible
+                      </div>
+                    )}
+                  </>
+                )}
+              />
+              {companies.length === 0 && (
+                <p className="text-xs text-gray-400 pl-1">
+                  Créez d&apos;abord une entreprise depuis le tableau de bord
+                </p>
               )}
-            />
+            </div>
           )}
 
           {/* Category */}
