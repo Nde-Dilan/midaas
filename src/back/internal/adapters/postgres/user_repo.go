@@ -47,6 +47,12 @@ func (r *userRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.User{}, "id = ?", id).Error
 }
 
+func (r *userRepository) ListAll(ctx context.Context) ([]domain.User, error) {
+	var list []domain.User
+	err := r.db.WithContext(ctx).Order("created_at DESC").Find(&list).Error
+	return list, err
+}
+
 type entrepreneurRepository struct {
 	db *gorm.DB
 }
@@ -84,6 +90,12 @@ func (r *entrepreneurRepository) Update(ctx context.Context, e *domain.Entrepren
 func (r *entrepreneurRepository) ListPending(ctx context.Context) ([]domain.Entrepreneur, error) {
 	var list []domain.Entrepreneur
 	err := r.db.WithContext(ctx).Where("status = ?", domain.EntrepreneurStatusPending).Find(&list).Error
+	return list, err
+}
+
+func (r *entrepreneurRepository) ListAll(ctx context.Context) ([]domain.Entrepreneur, error) {
+	var list []domain.Entrepreneur
+	err := r.db.WithContext(ctx).Order("created_at DESC").Find(&list).Error
 	return list, err
 }
 
