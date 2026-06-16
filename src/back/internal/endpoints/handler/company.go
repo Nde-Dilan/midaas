@@ -206,6 +206,135 @@ func (h *CompanyHandler) RequestReverify(w http.ResponseWriter, r *http.Request)
 	JSON(w, http.StatusOK, company)
 }
 
+func (h *CompanyHandler) SaveLegalDocs(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	companyID, err := uuid.Parse(r.PathValue("id"))
+	if err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid company id")
+		return
+	}
+	var input domain.CompanyLegalDocs
+	if err := Decode(r, &input); err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	existing, _ := h.companyRepo.FindLegalDocs(ctx, companyID)
+	if existing != nil {
+		input.ID = existing.ID
+		input.CreatedAt = existing.CreatedAt
+	}
+	input.CompanyID = companyID
+	if err := h.companyRepo.SaveLegalDocs(ctx, &input); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to save legal docs")
+		return
+	}
+	JSON(w, http.StatusOK, &input)
+}
+
+func (h *CompanyHandler) SaveFinancials(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	companyID, _ := uuid.Parse(r.PathValue("id"))
+	var input domain.CompanyFinancials
+	if err := Decode(r, &input); err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	existing, _ := h.companyRepo.FindFinancials(ctx, companyID)
+	if existing != nil {
+		input.ID = existing.ID
+		input.CreatedAt = existing.CreatedAt
+	}
+	input.CompanyID = companyID
+	if err := h.companyRepo.SaveFinancials(ctx, &input); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to save financials")
+		return
+	}
+	JSON(w, http.StatusOK, &input)
+}
+
+func (h *CompanyHandler) SaveOperations(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	companyID, _ := uuid.Parse(r.PathValue("id"))
+	var input domain.CompanyOperations
+	if err := Decode(r, &input); err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	existing, _ := h.companyRepo.FindOperations(ctx, companyID)
+	if existing != nil {
+		input.ID = existing.ID
+		input.CreatedAt = existing.CreatedAt
+	}
+	input.CompanyID = companyID
+	if err := h.companyRepo.SaveOperations(ctx, &input); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to save operations")
+		return
+	}
+	JSON(w, http.StatusOK, &input)
+}
+
+func (h *CompanyHandler) AddBeneficialOwner(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	companyID, _ := uuid.Parse(r.PathValue("id"))
+	var input domain.BeneficialOwner
+	if err := Decode(r, &input); err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if input.FullName == "" || input.EquityPercentage <= 0 {
+		JSONError(w, http.StatusBadRequest, "full_name and equity_percentage are required")
+		return
+	}
+	input.ID = uuid.New()
+	input.CompanyID = companyID
+	if err := h.companyRepo.AddBeneficialOwner(ctx, &input); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to add beneficial owner")
+		return
+	}
+	JSON(w, http.StatusCreated, &input)
+}
+
+func (h *CompanyHandler) RemoveBeneficialOwner(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	ownerID, _ := uuid.Parse(r.PathValue("ownerId"))
+	if err := h.companyRepo.RemoveBeneficialOwner(ctx, ownerID); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to remove beneficial owner")
+		return
+	}
+	JSON(w, http.StatusOK, map[string]string{"removed": ownerID.String()})
+}
+
+func (h *CompanyHandler) AddManager(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	companyID, _ := uuid.Parse(r.PathValue("id"))
+	var input domain.CompanyManager
+	if err := Decode(r, &input); err != nil {
+		JSONError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if input.FullName == "" {
+		JSONError(w, http.StatusBadRequest, "full_name is required")
+		return
+	}
+	input.ID = uuid.New()
+	input.CompanyID = companyID
+	if err := h.companyRepo.AddManager(ctx, &input); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to add manager")
+		return
+	}
+	JSON(w, http.StatusCreated, &input)
+}
+
+func (h *CompanyHandler) RemoveManager(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	managerID, _ := uuid.Parse(r.PathValue("managerId"))
+	if err := h.companyRepo.RemoveManager(ctx, managerID); err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to remove manager")
+		return
+	}
+	JSON(w, http.StatusOK, map[string]string{"removed": managerID.String()})
+}
+
 func (h *CompanyHandler) UploadDocument(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

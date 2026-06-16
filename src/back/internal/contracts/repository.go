@@ -34,6 +34,17 @@ type CompanyRepository interface {
 	ListApproved(ctx context.Context, filter CompanyFilter) ([]domain.Company, int64, error)
 	Update(ctx context.Context, company *domain.Company) error
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	SaveLegalDocs(ctx context.Context, docs *domain.CompanyLegalDocs) error
+	FindLegalDocs(ctx context.Context, companyID uuid.UUID) (*domain.CompanyLegalDocs, error)
+	SaveFinancials(ctx context.Context, f *domain.CompanyFinancials) error
+	FindFinancials(ctx context.Context, companyID uuid.UUID) (*domain.CompanyFinancials, error)
+	SaveOperations(ctx context.Context, ops *domain.CompanyOperations) error
+	FindOperations(ctx context.Context, companyID uuid.UUID) (*domain.CompanyOperations, error)
+	AddBeneficialOwner(ctx context.Context, owner *domain.BeneficialOwner) error
+	RemoveBeneficialOwner(ctx context.Context, ownerID uuid.UUID) error
+	AddManager(ctx context.Context, manager *domain.CompanyManager) error
+	RemoveManager(ctx context.Context, managerID uuid.UUID) error
 }
 
 type ProjectRepository interface {
