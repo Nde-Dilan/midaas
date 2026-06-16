@@ -29,6 +29,7 @@ type CompanyRepository interface {
 	FindByIDWithRelations(ctx context.Context, id uuid.UUID) (*domain.Company, error)
 	ListByEntrepreneur(ctx context.Context, entrepreneurID uuid.UUID) ([]domain.Company, error)
 	ListPending(ctx context.Context) ([]domain.Company, error)
+	ListApproved(ctx context.Context) ([]domain.Company, error)
 	Update(ctx context.Context, company *domain.Company) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
