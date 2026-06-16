@@ -38,7 +38,8 @@ func (r *companyRepository) FindByIDWithRelations(ctx context.Context, id uuid.U
 		Preload("BeneficialOwners").
 		Preload("Managers").
 		Preload("Operations").
-		Preload("Entrepreneur").
+		Preload("Entrepreneur.User").
+		Preload("Projects").
 		First(&c, "id = ?", id).Error
 	if err != nil {
 		return nil, err
@@ -102,4 +103,59 @@ func (r *companyRepository) ListApproved(ctx context.Context, filter contracts.C
 
 func (r *companyRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.Company{}, "id = ?", id).Error
+}
+
+func (r *companyRepository) SaveLegalDocs(ctx context.Context, docs *domain.CompanyLegalDocs) error {
+	return r.db.WithContext(ctx).Save(docs).Error
+}
+
+func (r *companyRepository) FindLegalDocs(ctx context.Context, companyID uuid.UUID) (*domain.CompanyLegalDocs, error) {
+	var docs domain.CompanyLegalDocs
+	err := r.db.WithContext(ctx).First(&docs, "company_id = ?", companyID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &docs, nil
+}
+
+func (r *companyRepository) SaveFinancials(ctx context.Context, f *domain.CompanyFinancials) error {
+	return r.db.WithContext(ctx).Save(f).Error
+}
+
+func (r *companyRepository) FindFinancials(ctx context.Context, companyID uuid.UUID) (*domain.CompanyFinancials, error) {
+	var f domain.CompanyFinancials
+	err := r.db.WithContext(ctx).First(&f, "company_id = ?", companyID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &f, nil
+}
+
+func (r *companyRepository) SaveOperations(ctx context.Context, ops *domain.CompanyOperations) error {
+	return r.db.WithContext(ctx).Save(ops).Error
+}
+
+func (r *companyRepository) FindOperations(ctx context.Context, companyID uuid.UUID) (*domain.CompanyOperations, error) {
+	var ops domain.CompanyOperations
+	err := r.db.WithContext(ctx).First(&ops, "company_id = ?", companyID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &ops, nil
+}
+
+func (r *companyRepository) AddBeneficialOwner(ctx context.Context, owner *domain.BeneficialOwner) error {
+	return r.db.WithContext(ctx).Create(owner).Error
+}
+
+func (r *companyRepository) RemoveBeneficialOwner(ctx context.Context, ownerID uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.BeneficialOwner{}, "id = ?", ownerID).Error
+}
+
+func (r *companyRepository) AddManager(ctx context.Context, manager *domain.CompanyManager) error {
+	return r.db.WithContext(ctx).Create(manager).Error
+}
+
+func (r *companyRepository) RemoveManager(ctx context.Context, managerID uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(&domain.CompanyManager{}, "id = ?", managerID).Error
 }
