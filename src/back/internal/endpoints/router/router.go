@@ -39,6 +39,13 @@ func New(
 	mux.Handle("GET /api/v1/companies/{id}", middleware.AuthRequired(http.HandlerFunc(companyHandler.GetByID)))
 	mux.Handle("POST /api/v1/companies/{id}/submit", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.Submit))))
 	mux.Handle("POST /api/v1/companies/{id}/upload", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.UploadDocument))))
+	mux.Handle("PUT /api/v1/companies/{id}/legal-docs", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.SaveLegalDocs))))
+	mux.Handle("PUT /api/v1/companies/{id}/financials", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.SaveFinancials))))
+	mux.Handle("PUT /api/v1/companies/{id}/operations", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.SaveOperations))))
+	mux.Handle("POST /api/v1/companies/{id}/beneficial-owners", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.AddBeneficialOwner))))
+	mux.Handle("DELETE /api/v1/companies/{id}/beneficial-owners/{ownerId}", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.RemoveBeneficialOwner))))
+	mux.Handle("POST /api/v1/companies/{id}/managers", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.AddManager))))
+	mux.Handle("DELETE /api/v1/companies/{id}/managers/{managerId}", middleware.AuthRequired(entrepOnly(http.HandlerFunc(companyHandler.RemoveManager))))
 	mux.HandleFunc("GET /api/v1/companies/public", companyHandler.ListPublic)
 	mux.Handle("POST /api/v1/companies/{id}/reverify", middleware.AuthRequired(http.HandlerFunc(companyHandler.RequestReverify)))
 
