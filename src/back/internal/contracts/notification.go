@@ -26,4 +26,5 @@ type NotificationService interface {
 	SendMilestoneApproved(ctx context.Context, projectID, milestoneID uuid.UUID, proofURLs []string) error
 	SendMilestoneRejected(ctx context.Context, projectID, milestoneID uuid.UUID, feedback string) error
 	SendRegistrationConfirmation(ctx context.Context, email, fullName string) error
+	SendInvestmentConfirmation(ctx context.Context, userID, projectID uuid.UUID) error
 }

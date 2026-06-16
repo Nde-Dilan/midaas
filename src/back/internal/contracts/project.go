@@ -10,14 +10,14 @@ import (
 type CreateProjectInput struct {
 	CompanyID      uuid.UUID
 	EntrepreneurID uuid.UUID
-	Title          string
-	Description    string
-	FundingGoal    float64
-	Currency       string
-	Category       string
-	CoverImageUrl  string
-	StartDate      string
-	EndDate        string
+	Title          string  `json:"title"`
+	Description    string  `json:"description"`
+	FundingGoal    float64 `json:"funding_goal"`
+	Currency       string  `json:"currency"`
+	Category       string  `json:"category"`
+	CoverImageUrl  string  `json:"cover_image_url"`
+	StartDate      string  `json:"start_date"`
+	EndDate        string  `json:"end_date"`
 }
 
 type ProjectFilter struct {

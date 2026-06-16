@@ -163,6 +163,84 @@ func (s *notificationService) SendRegistrationConfirmation(ctx context.Context, 
 	})
 }
 
+func (s *notificationService) SendInvestmentConfirmation(ctx context.Context, userID, projectID uuid.UUID) error {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("find user: %w", err)
+	}
+
+	project, err := s.projectRepo.FindByIDWithRelations(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("find project: %w", err)
+	}
+
+	var roiSection string
+	if project.ShortTermROI > 0 || project.MediumTermROI > 0 || project.LongTermROI > 0 {
+		roiSection = "<h3>ROI Projections</h3><table border='1' cellpadding='8' style='border-collapse:collapse;width:100%%'>"
+		if project.ShortTermROI > 0 {
+			roiSection += fmt.Sprintf("<tr><td>Court terme (%d mois)</td><td><strong>%.1f%%</strong></td></tr>", project.ShortTermMonths, project.ShortTermROI)
+		}
+		if project.MediumTermROI > 0 {
+			roiSection += fmt.Sprintf("<tr><td>Moyen terme (%d mois)</td><td><strong>%.1f%%</strong></td></tr>", project.MediumTermMonths, project.MediumTermROI)
+		}
+		if project.LongTermROI > 0 {
+			roiSection += fmt.Sprintf("<tr><td>Long terme (%d mois)</td><td><strong>%.1f%%</strong></td></tr>", project.LongTermMonths, project.LongTermROI)
+		}
+		roiSection += "</table>"
+	}
+
+	var breakEven string
+	if project.BreakEvenMonths > 0 {
+		breakEven = fmt.Sprintf("<p><strong>Point mort:</strong> %d mois</p>", project.BreakEvenMonths)
+	}
+
+	var riskSection string
+	if project.RiskZones != nil {
+		riskSection = "<h3>Risques identifies</h3><ul>"
+		riskSection += fmt.Sprintf("<li>Voir le dossier complet du projet</li>")
+		riskSection += "</ul>"
+	}
+
+	var docsSection string
+	if project.BusinessPlanDocs != nil || project.FinancialProjections != nil {
+		docsSection = "<h3>Documents</h3><p>Tous les documents (business plan, projections financieres) sont disponibles sur la plateforme.</p>"
+	}
+
+	html := fmt.Sprintf(`
+	<html><body style="font-family:Arial,sans-serif;padding:40px">
+	<h2>Investment Confirmed!</h2>
+	<p>Hello %s,</p>
+	<p>Your investment in <strong>%s</strong> has been confirmed.</p>
+	<h3>Project Overview</h3>
+	<p>%s</p>
+	%s
+	%s
+	<p><strong>Funding Goal:</strong> %.2f %s | <strong>Category:</strong> %s</p>
+	%s
+	%s
+	<h3>Market Analysis</h3>
+	<p>%s</p>
+	<h3>Competitive Advantage</h3>
+	<p>%s</p>
+	<p>You can track the project progress and milestones from your portfolio.</p>
+	<hr>
+	<p style="color:#888;font-size:12px">Midaas — Invest in Real Businesses</p>
+	</body></html>`,
+		user.FullName, project.Title, project.Description,
+		roiSection, breakEven,
+		project.FundingGoal, project.Currency, project.Category,
+		riskSection, docsSection,
+		truncate(project.MarketAnalysis, 500),
+		truncate(project.CompetitiveAdvantage, 500),
+	)
+
+	return s.emailSvc.Send(ctx, contracts.EmailMessage{
+		To:      []string{user.Email},
+		Subject: fmt.Sprintf("Investment confirmed — %s", project.Title),
+		HTML:    html,
+	})
+}
+
 func buildProofGallery(urls []string) string {
 	if len(urls) == 0 {
 		return "<p>No proofs attached.</p>"
@@ -202,4 +280,11 @@ func buildMilestoneRejectedEmail(fullName, projectTitle, milestoneTitle, feedbac
 	<hr>
 	<p style="color:#888;font-size:12px">Midaas — Invest in Real Businesses</p>
 	</body></html>`, fullName, milestoneTitle, projectTitle, feedback)
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max] + "..."
 }

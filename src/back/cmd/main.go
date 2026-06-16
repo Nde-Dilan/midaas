@@ -18,6 +18,7 @@ import (
 	adminsvc "github.com/MiltonJ23/Midaas/internal/services/admin"
 	authsvc "github.com/MiltonJ23/Midaas/internal/services/auth"
 	notifsvc "github.com/MiltonJ23/Midaas/internal/services/notification"
+	"github.com/MiltonJ23/Midaas/internal/services/worker"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -37,15 +38,15 @@ func main() {
 	entrepRepo := postgres.NewEntrepreneurRepository(db)
 	companyRepo := postgres.NewCompanyRepository(db)
 	adminRepo := postgres.NewAdminRepository(db)
+	projectRepo := postgres.NewProjectRepository(db)
+	milestoneRepo := postgres.NewMilestoneRepository(db)
+	investmentRepo := postgres.NewInvestmentRepository(db)
+	transactionRepo := postgres.NewTransactionRepository(db)
 
 	authService := authsvc.NewAuthService(userRepo, entrepRepo)
 
 	notifSvc := notifsvc.NewNotificationService(
-		emailSvc,
-		postgres.NewMilestoneRepository(db),
-		postgres.NewProjectRepository(db),
-		postgres.NewInvestmentRepository(db),
-		postgres.NewUserRepository(db),
+		emailSvc, milestoneRepo, projectRepo, investmentRepo, userRepo,
 		requireOr("SMTP_FROM", "noreply@midaas.com"),
 	)
 
@@ -54,20 +55,20 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService, notifSvc)
 	uploadHandler := handler.NewUploadHandler(objStorage, userRepo)
 	companyHandler := handler.NewCompanyHandler(companyRepo, entrepRepo, objStorage)
-	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo)
+	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo, companyRepo, projectRepo, milestoneRepo, notifSvc)
+	projectHandler := handler.NewProjectHandler(projectRepo, milestoneRepo, investmentRepo, transactionRepo, companyRepo, entrepRepo, userRepo, objStorage, notifSvc)
+	investmentHandler := handler.NewInvestmentHandler(investmentRepo, projectRepo, userRepo, notifSvc)
 
 	seedAdmin(log, adminRepo, authsvc.NewPasswordHasher())
+	worker.StartAutoCancel(projectRepo, investmentRepo, transactionRepo, log)
 
-	apiRouter := router.New(log, authHandler, uploadHandler, companyHandler, adminHandler, entrepRepo)
+	apiRouter := router.New(log, authHandler, uploadHandler, companyHandler, adminHandler, projectHandler, investmentHandler, entrepRepo)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", apiRouter)
 
 	port := requireOr("PORT", "8080")
-	log.Info("server ready",
-		slog.String("port", port),
-		slog.Bool("redis", rdb != nil),
-	)
+	log.Info("server ready", slog.String("port", port), slog.Bool("redis", rdb != nil))
 
 	srv := &http.Server{Addr: ":" + port, Handler: mux}
 	if err := srv.ListenAndServe(); err != nil {
@@ -123,9 +124,7 @@ func initRedis(log *slog.Logger) *redis.Client {
 	}
 	client, err := redisadapter.NewClient(url, pass)
 	if err != nil {
-		log.Warn("redis: failed to connect, continuing without cache",
-			slog.String("error", err.Error()),
-		)
+		log.Warn("redis: failed to connect", slog.String("error", err.Error()))
 		return nil
 	}
 	log.Info("redis: connected")

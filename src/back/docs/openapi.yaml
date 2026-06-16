@@ -23,7 +23,7 @@ info:
 
     Tous les endpoints acceptent le preflight `OPTIONS` → `204` avec headers CORS.
 
-  version: "1.2.0"
+  version: "1.3.0"
   contact:
     name: Midaas
     email: dev@midaas.com
@@ -798,6 +798,384 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+  /projects:
+    post:
+      summary: Creer un projet d'investissement
+      description: |
+        Entrepreneur uniquement. Accepte les milestones en batch.
+        Inclut le dossier complet: ROI (court/moyen/long terme), break-even,
+        zones de risque, repartition des fonds, documents, analyse de marche.
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, funding_goal, company_id]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                funding_goal:
+                  type: number
+                currency:
+                  type: string
+                  example: XOF
+                category:
+                  type: string
+                cover_image_url:
+                  type: string
+                company_id:
+                  type: string
+                  format: uuid
+                short_term_roi:
+                  type: number
+                short_term_months:
+                  type: integer
+                medium_term_roi:
+                  type: number
+                medium_term_months:
+                  type: integer
+                long_term_roi:
+                  type: number
+                long_term_months:
+                  type: integer
+                break_even_months:
+                  type: integer
+                risk_zones:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      description: { type: string }
+                      severity: { type: string }
+                      mitigation: { type: string }
+                use_of_funds:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      category: { type: string }
+                      amount: { type: number }
+                      percentage: { type: number }
+                      details: { type: string }
+                business_plan_docs:
+                  type: array
+                  items: { type: string }
+                financial_projections:
+                  type: array
+                  items: { type: string }
+                market_analysis:
+                  type: string
+                competitive_advantage:
+                  type: string
+                team_background:
+                  type: string
+                milestones:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title: { type: string }
+                      description: { type: string }
+                      order_num: { type: integer }
+                      fund_allocation: { type: number }
+                      due_date: { type: string }
+      responses:
+        "201":
+          description: Projet cree
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /projects/public:
+    get:
+      summary: Lister les projets (public, filtrable)
+      tags: [projects]
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: currency
+          in: query
+          schema: { type: string }
+        - name: query
+          in: query
+          schema: { type: string }
+        - name: min_goal
+          in: query
+          schema: { type: number }
+        - name: max_goal
+          in: query
+          schema: { type: number }
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: page_size
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Liste paginee
+
+  /projects/discover:
+    get:
+      summary: Decouvrir 10 projets actifs
+      description: Public — top 10 projets `active` avec resume, societe, ROI, nombre d'investisseurs.
+      tags: [projects]
+      responses:
+        "200":
+          description: 10 projets pour attirer les investisseurs
+
+  /projects/{id}:
+    get:
+      summary: Details complets d'un projet
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet + milestones + investments + company
+
+  /projects/my:
+    get:
+      summary: Mes projets (entrepreneur)
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des projets de l'entrepreneur
+
+  /projects/{id}/submit:
+    post:
+      summary: Soumettre un projet (draft → pending)
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet soumis pour validation admin
+
+  /projects/{id}/accept:
+    post:
+      summary: Accepter le lancement du projet (entrepreneur, <48h apres funded)
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet accepte → active, premier milestone active
+
+  /projects/{id}/cancel:
+    post:
+      summary: Annuler un projet (entrepreneur, avant le 1er milestone)
+      description: Annule le projet et declenche le remboursement automatique de tous les investisseurs.
+      tags: [projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet annule, refunds crees
+
+  /projects/{id}/invest:
+    post:
+      summary: Investir dans un projet
+      description: |
+        Confirme immediatement. Un email est envoye avec le dossier complet:
+        ROI, break-even, risques, analyse de marche, avantage concurrentiel.
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                currency:
+                  type: string
+      responses:
+        "201":
+          description: Investissement enregistre
+
+  /projects/{id}/investors:
+    get:
+      summary: Voir les investisseurs d'un projet
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Liste des investisseurs (nom, montant, ownership %)
+
+  /investments/my:
+    get:
+      summary: Mes investissements
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste de mes investissements
+
+  /milestones/{id}/upload:
+    post:
+      summary: Uploader les preuves d'un milestone (entrepreneur)
+      tags: [milestones]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items: { type: string, format: binary }
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Preuves uploadees, milestone → under_review
+
+  /admin/projects/pending:
+    get:
+      summary: Projets en attente (details complets)
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Projets avec milestones, investments, company
+
+  /admin/projects/{id}/approve:
+    post:
+      summary: Approuver un projet → active
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet approuve
+
+  /admin/projects/{id}/reject:
+    post:
+      summary: Rejeter un projet
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Projet rejete
+
+  /admin/milestones/pending:
+    get:
+      summary: Milestones en attente de review
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des milestones under_review
+
+  /admin/milestones/{id}/approve:
+    post:
+      summary: Approuver un milestone + email investisseurs avec proofs
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Milestone approuve, emails envoyes
+
+  /admin/milestones/{id}/reject:
+    post:
+      summary: Rejeter un milestone + feedback
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: string
+      responses:
+        "200":
+          description: Milestone rejete, emails envoyes
+
 components:
 
   securitySchemes:
@@ -957,6 +1335,12 @@ tags:
     description: Upload de fichiers (CNI, documents)
   - name: companies
     description: Gestion des businesses
+  - name: projects
+    description: Projets d'investissement (ROI, risques, milestones)
+  - name: milestones
+    description: Etapes et preuves des projets
+  - name: investments
+    description: Investissements et investisseurs
   - name: admin
     description: Administration (validation, gestion)
   - name: system
