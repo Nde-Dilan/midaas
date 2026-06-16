@@ -62,6 +62,15 @@ func (r *companyRepository) Update(ctx context.Context, c *domain.Company) error
 	return r.db.WithContext(ctx).Save(c).Error
 }
 
+func (r *companyRepository) ListApproved(ctx context.Context) ([]domain.Company, error) {
+	var list []domain.Company
+	err := r.db.WithContext(ctx).
+		Where("status = ?", domain.CompanyStatusApproved).
+		Order("created_at DESC").
+		Find(&list).Error
+	return list, err
+}
+
 func (r *companyRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return r.db.WithContext(ctx).Delete(&domain.Company{}, "id = ?", id).Error
 }
