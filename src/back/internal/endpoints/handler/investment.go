@@ -173,13 +173,13 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 	)
 
 	JSON(w, http.StatusCreated, map[string]interface{}{
-		"investment":         investment,
-		"invested_amount":    input.Amount,
-		"platform_fee_pct":   h.platformFeePct,
-		"platform_fee_amt":   feeAmt,
-		"total_charge":       totalCharge,
-		"remaining":          project.FundingGoal - project.FundingRaised - input.Amount,
-		"funding_progress":   fmt.Sprintf("%.1f%%", (project.FundingRaised + input.Amount)/project.FundingGoal*100),
+		"investment":       investment,
+		"invested_amount":  input.Amount,
+		"platform_fee_pct": h.platformFeePct,
+		"platform_fee_amt": feeAmt,
+		"total_charge":     totalCharge,
+		"remaining":        project.FundingGoal - project.FundingRaised,
+		"funding_progress": fmt.Sprintf("%.1f%%", project.FundingRaised/project.FundingGoal*100),
 	})
 }
 
