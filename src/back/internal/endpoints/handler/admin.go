@@ -365,10 +365,12 @@ func (h *AdminHandler) RejectMilestone(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) ListTransactions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	txns, _, err := h.transactionRepo.ListByUser(ctx, uuid.Nil, 1, 500)
+	txns, total, err := h.transactionRepo.ListAll(ctx, 1, 200)
 	if err != nil {
 		JSONError(w, http.StatusInternalServerError, "failed to list transactions")
 		return
 	}
-	JSON(w, http.StatusOK, txns)
+	JSONPaginated(w, http.StatusOK, txns, map[string]interface{}{
+		"total": total, "page": 1, "page_size": 200,
+	})
 }

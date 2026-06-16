@@ -103,3 +103,29 @@ func (r *transactionRepository) ListByUser(ctx context.Context, userID uuid.UUID
 
 	return list, total, err
 }
+
+func (r *transactionRepository) ListAll(ctx context.Context, page, pageSize int) ([]domain.Transaction, int64, error) {
+	var list []domain.Transaction
+	var total int64
+
+	if pageSize <= 0 {
+		pageSize = 50
+	}
+	if page <= 1 {
+		page = 1
+	}
+	offset := (page - 1) * pageSize
+
+	query := r.db.WithContext(ctx).Model(&domain.Transaction{})
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := query.Order("created_at DESC").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&list).Error
+
+	return list, total, err
+}

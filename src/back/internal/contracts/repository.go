@@ -79,6 +79,7 @@ type TransactionRepository interface {
 	Create(ctx context.Context, transaction *domain.Transaction) error
 	FindByID(ctx context.Context, id uuid.UUID) (*domain.Transaction, error)
 	ListByUser(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]domain.Transaction, int64, error)
+	ListAll(ctx context.Context, page, pageSize int) ([]domain.Transaction, int64, error)
 }
 
 type AdminRepository interface {
