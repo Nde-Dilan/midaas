@@ -15,6 +15,7 @@ const (
 	ProjectStatusComplete = "completed"
 	ProjectStatusBlocked  = "blocked"
 	ProjectStatusRejected = "rejected"
+	ProjectStatusCancelled = "cancelled"
 )
 
 type Project struct {
@@ -31,8 +32,27 @@ type Project struct {
 	CoverImageUrl  string    `json:"cover_image_url"`
 	StartDate      *time.Time `json:"start_date"`
 	EndDate        *time.Time `json:"end_date"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
+
+	ShortTermROI        float64        `json:"short_term_roi"`
+	ShortTermMonths     int            `json:"short_term_months"`
+	MediumTermROI       float64        `json:"medium_term_roi"`
+	MediumTermMonths    int            `json:"medium_term_months"`
+	LongTermROI         float64        `json:"long_term_roi"`
+	LongTermMonths      int            `json:"long_term_months"`
+	BreakEvenMonths     int            `json:"break_even_months"`
+	RiskZones           datatypes.JSON `gorm:"type:jsonb" json:"risk_zones"`
+	UseOfFunds          datatypes.JSON `gorm:"type:jsonb" json:"use_of_funds"`
+	BusinessPlanDocs    datatypes.JSON `gorm:"type:jsonb" json:"business_plan_docs"`
+	FinancialProjections datatypes.JSON `gorm:"type:jsonb" json:"financial_projections"`
+	MarketAnalysis      string         `gorm:"type:text" json:"market_analysis"`
+	CompetitiveAdvantage string        `gorm:"type:text" json:"competitive_advantage"`
+	TeamBackground      string         `gorm:"type:text" json:"team_background"`
+
+	AcceptedAt         *time.Time `json:"accepted_at"`
+	AcceptanceDeadline *time.Time `json:"acceptance_deadline"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	Company      Company      `gorm:"foreignKey:CompanyID" json:"company,omitempty"`
 	Entrepreneur Entrepreneur `gorm:"foreignKey:EntrepreneurID" json:"entrepreneur,omitempty"`
