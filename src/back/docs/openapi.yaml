@@ -203,8 +203,8 @@ paths:
     post:
       summary: Passer en mode entrepreneur
       description: |
-        Cree un profil entrepreneur. Statut initial: `pending` — un admin doit valider.
-        Une seule demande par utilisateur. Rejete = definitif.
+        Cree un profil entrepreneur avec le statut `active` directement.
+        La verification se fait au niveau des documents des companies soumises.
       tags: [auth]
       security:
         - bearerAuth: []
@@ -220,20 +220,11 @@ paths:
                 data:
                   id: "660e8400-..."
                   user_id: "550e8400-..."
-                  status: "pending"
+                  status: "active"
                   created_at: "2026-06-15T13:00:00Z"
                   updated_at: "2026-06-15T13:00:00Z"
         "401":
           $ref: "#/components/responses/Unauthorized"
-        "403":
-          description: Candidature deja rejetee
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-              example:
-                success: false
-                error: "entrepreneur application was rejected"
         "409":
           description: Deja entrepreneur
           content:
@@ -539,11 +530,39 @@ paths:
   /companies/public:
     get:
       summary: Lister les businesses approuves
-      description: Public — retourne tous les businesses avec le statut `approved`.
+      description: Public — retourne les businesses `approved` avec filtrage et pagination.
       tags: [companies]
+      parameters:
+        - name: industry_sector
+          in: query
+          schema:
+            type: string
+          example: Fintech
+        - name: corporate_form
+          in: query
+          schema:
+            type: string
+            enum: [ETS, SARL, SA, SAS]
+          example: SARL
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Recherche textuelle sur legal_name et trade_name
+          example: Alpha
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
       responses:
         "200":
-          description: Liste des businesses approuves
+          description: Liste des businesses approuves (paginee)
           content:
             application/json:
               schema:
@@ -557,6 +576,10 @@ paths:
                     corporate_form: "SARL"
                     industry_sector: "Fintech"
                     status: "approved"
+                meta:
+                  total: 42
+                  page: 1
+                  page_size: 20
 
   /companies/{id}/reverify:
     post:
@@ -668,7 +691,7 @@ components:
           format: uuid
         status:
           type: string
-          enum: [pending, active, rejected, suspended]
+          enum: [active, suspended]
         created_at:
           type: string
           format: date-time
