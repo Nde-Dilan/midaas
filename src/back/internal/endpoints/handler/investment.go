@@ -160,7 +160,9 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 	h.projectRepo.Update(ctx, project)
 
 	if h.notifSvc != nil {
-		go h.notifSvc.SendInvestmentConfirmation(ctx, userID, project.ID)
+		uid := userID
+		pid := project.ID
+		go h.notifSvc.SendInvestmentConfirmation(context.Background(), uid, pid)
 	}
 
 	logger.Info(ctx, "handler: investment recorded",
