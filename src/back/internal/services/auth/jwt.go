@@ -12,6 +12,7 @@ import (
 type TokenClaims struct {
 	jwt.RegisteredClaims
 	Email string `json:"email"`
+	Role  string `json:"role,omitempty"`
 }
 
 type JWTService struct {
@@ -77,4 +78,38 @@ func (s *JWTService) Validate(tokenString string) (uuid.UUID, string, error) {
 	}
 
 	return userID, claims.Email, nil
+}
+
+func (s *JWTService) IssueForAdmin(adminID uuid.UUID, email string) (string, error) {
+	now := time.Now()
+	claims := TokenClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   adminID.String(),
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(s.ttl)),
+			Issuer:    "midaas-admin",
+		},
+		Email: email,
+		Role:  "admin",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(s.secret)
+}
+
+func (s *JWTService) ValidateAdmin(tokenString string) (uuid.UUID, error) {
+	userID, email, err := s.Validate(tokenString)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	token, _ := jwt.ParseWithClaims(tokenString, &TokenClaims{},
+		func(token *jwt.Token) (interface{}, error) { return s.secret, nil },
+	)
+	if claims, ok := token.Claims.(*TokenClaims); ok && claims.Role == "admin" {
+		return userID, nil
+	}
+
+	_ = email
+	return uuid.Nil, fmt.Errorf("not an admin token")
 }

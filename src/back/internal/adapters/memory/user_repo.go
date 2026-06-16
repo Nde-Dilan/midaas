@@ -67,6 +67,16 @@ func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+func (r *UserRepository) ListAll(ctx context.Context) ([]domain.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var list []domain.User
+	for _, u := range r.users {
+		list = append(list, *u)
+	}
+	return list, nil
+}
+
 type EntrepreneurRepository struct {
 	mu           sync.RWMutex
 	entrepreneurs map[string]*domain.Entrepreneur
@@ -123,4 +133,14 @@ func (r *EntrepreneurRepository) ListPending(ctx context.Context) ([]domain.Entr
 		}
 	}
 	return pending, nil
+}
+
+func (r *EntrepreneurRepository) ListAll(ctx context.Context) ([]domain.Entrepreneur, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var list []domain.Entrepreneur
+	for _, e := range r.entrepreneurs {
+		list = append(list, *e)
+	}
+	return list, nil
 }
