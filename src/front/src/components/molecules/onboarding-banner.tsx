@@ -145,7 +145,9 @@ export default function OnboardingBanner({ onDismiss }: Props) {
               <TrendingUp className="w-4 h-4 text-[#F6C305]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">Investisseur</p>
+              <p className="text-sm font-semibold text-gray-900">
+                Investisseur
+              </p>
               <p className="text-xs text-gray-500">
                 Explorez et investissez dans des projets prometteurs
               </p>

@@ -42,9 +42,7 @@ const normalizeUserFromResponse = (rawData: any): User | null => {
   // Extract role-level fields from the payload (siblings of `user`)
   const isEntrepreneur = !!(payload?.is_entrepreneur ?? false);
   const entrepreneurStatus =
-    payload?.entrepreneur?.status ??
-    payload?.entrepreneur_status ??
-    null;
+    payload?.entrepreneur?.status ?? payload?.entrepreneur_status ?? null;
 
   // If the payload has a `user` key, navigate into it
   const source = payload?.user ?? payload?.Data ?? payload?.data ?? payload;
@@ -68,9 +66,10 @@ const normalizeUserFromResponse = (rawData: any): User | null => {
   }
 
   // Determine role
-  const role = isEntrepreneur && entrepreneurStatus === "active"
-    ? "entrepreneur" as const
-    : "investor" as const;
+  const role =
+    isEntrepreneur && entrepreneurStatus === "active"
+      ? ("entrepreneur" as const)
+      : ("investor" as const);
 
   return new User({
     id: String(id),

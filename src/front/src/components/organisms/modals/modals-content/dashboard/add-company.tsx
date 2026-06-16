@@ -19,12 +19,7 @@ import { useAuthStore } from "@/store/auth";
 import { useCompanyStore } from "@/store/company";
 import { Loader, Building2 } from "lucide-react";
 
-const corporateForms = [
-  "ETS",
-  "SARL",
-  "SA",
-  "SAS",
-];
+const corporateForms = ["ETS", "SARL", "SA", "SAS"];
 
 const industrySectors = [
   "Agriculture",

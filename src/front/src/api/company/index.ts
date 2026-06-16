@@ -156,7 +156,8 @@ export const companyProvider = {
         return {
           status: response.status,
           data: {
-            message: response.data?.message ?? "Entreprise supprimée avec succès",
+            message:
+              response.data?.message ?? "Entreprise supprimée avec succès",
           },
         };
       }
