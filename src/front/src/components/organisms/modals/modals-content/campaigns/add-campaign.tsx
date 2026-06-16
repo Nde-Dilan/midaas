@@ -25,17 +25,17 @@ import Project from "@/entities/project/project";
 
 const campaignCategories = [
   "Agriculture",
-  "Technologie",
+  "Technology",
   "Art & Culture",
   "Education",
-  "Santé",
-  "Environnement",
+  "Healthcare",
+  "Environment",
   "Commerce",
-  "Artisanat",
-  "Immobilier",
+  "Crafts",
+  "Real Estate",
   "Transport",
-  "Alimentation",
-  "Autre",
+  "Food",
+  "Other",
 ];
 
 type ICampaignForm = {
@@ -152,12 +152,11 @@ export default function AddCampaignModal() {
   };
 
   return (
-    <section className="w-full p-8 flex flex-col max-h-[80vh] bg-white">
+  <section className="w-full p-8 flex flex-col max-h-[80vh] bg-white">
       <div className="w-full flex items-center justify-between">
         <DialogTitle>
-          {isEditMode ? "Modifier la campagne" : "Nouvelle campagne"}
-        </DialogTitle>
-
+            {isEditMode ? "Edit Campaign" : "New Campaign"}
+</DialogTitle>
         <span
           onClick={() => {
             reset();
@@ -172,7 +171,8 @@ export default function AddCampaignModal() {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="stroke-primary"
+            stroke="currentColor"
+            className="text-[#00de00]"
           >
             <path
               d="M6 18L18 6M6 6L18 18"
@@ -193,11 +193,11 @@ export default function AddCampaignModal() {
           <Controller
             name="title"
             control={control}
-            rules={{ required: "Le titre est requis" }}
+            rules={{ required: "Title is required" }}
             render={({ field }) => (
               <MUIInput
                 {...field}
-                label="Titre de la campagne"
+                label="Campaign Title"
                 after={<div className="pr-4"></div>}
                 className="pl-4"
               />
@@ -208,11 +208,11 @@ export default function AddCampaignModal() {
           <Controller
             name="description"
             control={control}
-            rules={{ required: "La description est requise" }}
+            rules={{ required: "Description is required" }}
             render={({ field }) => (
               <MUITextarea
                 {...field}
-                label="Description de la campagne"
+                label="Campaign Description"
                 className="min-h-[100px]"
                 placeholder=" "
               />
@@ -223,12 +223,12 @@ export default function AddCampaignModal() {
           <Controller
             name="fundingGoal"
             control={control}
-            rules={{ required: "L'objectif de financement est requis" }}
+            rules={{ required: "Funding goal is required" }}
             render={({ field }) => (
               <MUIInput
                 {...field}
                 type="number"
-                label="Objectif de financement"
+                label="Funding Goal"
                 after={
                   <div className="pr-4">
                     <span className="text-gray-500 text-sm">
@@ -247,7 +247,7 @@ export default function AddCampaignModal() {
               <Controller
                 name="companyId"
                 control={control}
-                rules={{ required: "Veuillez sélectionner une entreprise" }}
+                rules={{ required: "Please select a company" }}
                 render={({ field }) => (
                   <>
                     {companies.length > 0 ? (
@@ -256,7 +256,7 @@ export default function AddCampaignModal() {
                         value={field.value}
                       >
                         <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Sélectionner une entreprise" />
+                          <SelectValue placeholder="Select a company" />
                         </SelectTrigger>
                         <SelectContent>
                           {companies.map((company) => (
@@ -268,7 +268,7 @@ export default function AddCampaignModal() {
                       </Select>
                     ) : (
                       <div className="h-12 flex items-center px-3 rounded-md border border-input bg-white text-sm text-gray-400 cursor-not-allowed">
-                        Aucune entreprise disponible
+                        No company available
                       </div>
                     )}
                   </>
@@ -276,7 +276,7 @@ export default function AddCampaignModal() {
               />
               {companies.length === 0 && (
                 <p className="text-xs text-gray-400 pl-1">
-                  Créez d&apos;abord une entreprise depuis le tableau de bord
+                  Create a company first from your dashboard
                 </p>
               )}
             </div>
@@ -286,11 +286,11 @@ export default function AddCampaignModal() {
           <Controller
             name="category"
             control={control}
-            rules={{ required: "La catégorie est requise" }}
+            rules={{ required: "Category is required" }}
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Sélectionner une catégorie" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {campaignCategories.map((cat) => (
@@ -310,10 +310,10 @@ export default function AddCampaignModal() {
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Devise" />
+                  <SelectValue placeholder="Currency" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="XOF">XOF (F CFA)</SelectItem>
+                  <SelectItem value="XOF">XOF (CFA Franc)</SelectItem>
                   <SelectItem value="EUR">EUR (€)</SelectItem>
                   <SelectItem value="USD">USD ($)</SelectItem>
                 </SelectContent>
@@ -326,7 +326,7 @@ export default function AddCampaignModal() {
             name="startDate"
             control={control}
             render={({ field }) => (
-              <DatePicker {...field} label="Date de début" />
+              <DatePicker {...field} label="Start Date" />
             )}
           />
 
@@ -335,7 +335,7 @@ export default function AddCampaignModal() {
             name="endDate"
             control={control}
             render={({ field }) => (
-              <DatePicker {...field} label="Date de fin" />
+              <DatePicker {...field} label="End Date" />
             )}
           />
         </div>
@@ -350,15 +350,15 @@ export default function AddCampaignModal() {
               toggle();
             }}
           >
-            Annuler
+            Cancel
           </Button>
           <Button type="submit" disabled={loading}>
             {loading ? (
               <Loader className="animate-spin w-4 h-4" />
             ) : isEditMode ? (
-              "Modifier"
+              "Save Changes"
             ) : (
-              "Créer la campagne"
+              "Create Campaign"
             )}
           </Button>
         </div>

@@ -122,12 +122,12 @@ export default class Milestone {
 
   get statusLabel(): string {
     const labels: Record<string, string> = {
-      pending: "En attente",
+      pending: "Pending",
       active: "Active",
-      under_review: "En révision",
-      approved: "Approuvé",
-      rejected: "Rejeté",
-      paid: "Payé",
+      under_review: "Under Review",
+      approved: "Approved",
+      rejected: "Rejected",
+      paid: "Paid",
     };
     return labels[this._status] || this._status;
   }

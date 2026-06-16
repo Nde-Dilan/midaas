@@ -59,7 +59,7 @@ export default function CampaignDetailsModal() {
 
   const handleDeleteMilestone = async (milestoneId: string) => {
     if (!campaign) return;
-    if (!confirm("Voulez-vous vraiment supprimer ce jalon ?")) return;
+    if (!confirm("Are you sure you want to delete this milestone?")) return;
 
     const { data: result, error } = await campaignProvider.removeMilestone(
       campaign.id,
@@ -67,7 +67,7 @@ export default function CampaignDetailsModal() {
     );
 
     if (result) {
-      toast.success("Jalon supprimé avec succès");
+      toast.success("Milestone deleted successfully");
       setMilestones((prev) => prev.filter((m) => m.id !== milestoneId));
     } else {
       toast.error(error);
@@ -78,7 +78,7 @@ export default function CampaignDetailsModal() {
     if (!campaign) return;
     if (
       !confirm(
-        "Voulez-vous vraiment supprimer cette campagne ? Cette action est irréversible.",
+        "Are you sure you want to delete this campaign? This action is irreversible.",
       )
     )
       return;
@@ -87,7 +87,7 @@ export default function CampaignDetailsModal() {
     const { data: result, error } = await campaignProvider.remove(campaign.id);
 
     if (result) {
-      toast.success("Campagne supprimée avec succès");
+      toast.success("Campaign deleted successfully");
       toggle();
     } else {
       toast.error(error);
@@ -127,7 +127,8 @@ export default function CampaignDetailsModal() {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="stroke-primary"
+            stroke="currentColor"
+            className="text-[#00de00]"
           >
             <path
               d="M6 18L18 6M6 6L18 18"
@@ -143,7 +144,7 @@ export default function CampaignDetailsModal() {
         {/* Status & Progress */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Statut</p>
+            <p className="text-sm text-gray-500">Status</p>
             <span
               className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-semibold ${campaign.statusColor}`}
             >
@@ -151,20 +152,20 @@ export default function CampaignDetailsModal() {
             </span>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Progression</p>
+            <p className="text-sm text-gray-500">Progress</p>
             <p className="text-xl font-bold mt-1">
               {campaign.progressPercentage}%
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Objectif</p>
+            <p className="text-sm text-gray-500">Goal</p>
             <p className="text-lg font-semibold mt-1">
               {campaign.fundingGoal.toLocaleString()}{" "}
               <span className="text-sm text-gray-500">{campaign.currency}</span>
             </p>
           </div>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-500">Collecté</p>
+            <p className="text-sm text-gray-500">Raised</p>
             <p className="text-lg font-semibold mt-1">
               {campaign.fundingRaised.toLocaleString()}{" "}
               <span className="text-sm text-gray-500">{campaign.currency}</span>
@@ -183,16 +184,16 @@ export default function CampaignDetailsModal() {
         {/* Category & Dates */}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-500">Catégorie:</span>
+            <span className="text-gray-500">Category:</span>
             <span className="ml-2 font-medium">{campaign.category}</span>
           </div>
           <div>
-            <span className="text-gray-500">Devise:</span>
+            <span className="text-gray-500">Currency:</span>
             <span className="ml-2 font-medium">{campaign.currency}</span>
           </div>
           {campaign.startDate && (
             <div>
-              <span className="text-gray-500">Début:</span>
+              <span className="text-gray-500">Start:</span>
               <span className="ml-2 font-medium">
                 {campaign.startDate.toLocaleDateString()}
               </span>
@@ -200,7 +201,7 @@ export default function CampaignDetailsModal() {
           )}
           {campaign.endDate && (
             <div>
-              <span className="text-gray-500">Fin:</span>
+              <span className="text-gray-500">End:</span>
               <span className="ml-2 font-medium">
                 {campaign.endDate.toLocaleDateString()}
               </span>
@@ -212,7 +213,7 @@ export default function CampaignDetailsModal() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-gray-900">
-              Jalons ({milestones.length})
+              Milestones ({milestones.length})
             </h3>
             <Button
               type="button"
@@ -221,7 +222,7 @@ export default function CampaignDetailsModal() {
               className="gap-1"
             >
               <Plus className="w-3 h-3" />
-              Ajouter
+              Add
             </Button>
           </div>
 
@@ -232,20 +233,22 @@ export default function CampaignDetailsModal() {
           ) : milestones.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
               <p className="text-gray-500 text-sm">
-                Aucun jalon défini pour cette campagne
+                No milestones defined for this campaign
               </p>
               <p className="text-gray-400 text-xs mt-1">
-                Les jalons permettent de débloquer les fonds progressivement
+                Milestones allow you to release funds progressively as goals are
+                met
               </p>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-gray-500 px-2 mb-1">
                 <span>
-                  {completedMilestones}/{milestones.length} complétés
+                  {completedMilestones}/{milestones.length} completed
                 </span>
                 <span>
-                  Alloué: {totalAllocated.toLocaleString()} {campaign.currency}
+                  Allocated: {totalAllocated.toLocaleString()}{" "}
+                  {campaign.currency}
                 </span>
               </div>
               {milestones.map((milestone, index) => (
@@ -265,7 +268,7 @@ export default function CampaignDetailsModal() {
                         {milestone.fundAllocation.toLocaleString()}{" "}
                         {campaign.currency}
                         {milestone.dueDate &&
-                          ` — Échéance: ${milestone.dueDate.toLocaleDateString()}`}
+                          ` — Due: ${milestone.dueDate.toLocaleDateString()}`}
                       </p>
                     </div>
                   </div>
@@ -298,14 +301,14 @@ export default function CampaignDetailsModal() {
           onClick={handleDeleteCampaign}
           disabled={loading}
         >
-          Supprimer
+          Delete
         </Button>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={() => toggle()}>
-            Fermer
+            Close
           </Button>
           <Button type="button" onClick={handleEdit}>
-            Modifier
+            Edit
           </Button>
         </div>
       </div>

@@ -95,8 +95,8 @@ export const campaignProvider = {
 
         return response;
       },
-      "Impossible de récupérer la liste des campagnes",
-      "Liste des campagnes récupérée avec succès",
+      "Unable to fetch campaign list",
+      "Campaign list retrieved successfully",
     );
   },
 
@@ -124,8 +124,8 @@ export const campaignProvider = {
 
         return response;
       },
-      "Impossible de récupérer les détails de la campagne",
-      "Détails de la campagne récupérés avec succès",
+      "Unable to fetch campaign details",
+      "Campaign details retrieved successfully",
     );
   },
 
@@ -145,7 +145,8 @@ export const campaignProvider = {
           return {
             status: response.status,
             data: {
-              message: response.data?.message ?? "Campagne créée avec succès",
+              message:
+                response.data?.message ?? "Campaign created successfully",
               project,
             },
           };
@@ -153,7 +154,7 @@ export const campaignProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la création de la campagne",
+      "An error occurred while creating the campaign",
     );
   },
 
@@ -174,7 +175,7 @@ export const campaignProvider = {
             status: response.status,
             data: {
               message:
-                response.data?.message ?? "Campagne mise à jour avec succès",
+                response.data?.message ?? "Campaign updated successfully",
               project,
             },
           };
@@ -182,7 +183,7 @@ export const campaignProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la mise à jour de la campagne",
+      "An error occurred while updating the campaign",
     );
   },
 
@@ -194,7 +195,7 @@ export const campaignProvider = {
         return {
           status: response.status,
           data: {
-            message: response.data?.message ?? "Campagne supprimée avec succès",
+            message: response.data?.message ?? "Campaign deleted successfully",
           },
         };
       }

@@ -130,13 +130,13 @@ export default class Project {
 
   get statusLabel(): string {
     const labels: Record<string, string> = {
-      draft: "Brouillon",
-      pending: "En attente",
+      draft: "Draft",
+      pending: "Pending",
       active: "Active",
-      funded: "Financé",
-      completed: "Terminé",
-      blocked: "Bloqué",
-      rejected: "Rejeté",
+      funded: "Funded",
+      completed: "Completed",
+      blocked: "Blocked",
+      rejected: "Rejected",
     };
     return labels[this._status] || this._status;
   }

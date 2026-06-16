@@ -100,15 +100,15 @@ export default function MyCampaignsPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-MontserratBold text-gray-900">
-              Mes Campagnes
+              My Campaigns
             </h1>
             <p className="text-gray-500 text-sm mt-1">
-              Gérez vos projets de financement participatif
+              Manage your crowdfunding projects
             </p>
           </div>
           <Button onClick={handleAddCampaign} className="gap-2">
             <Plus className="w-4 h-4" />
-            Nouvelle campagne
+            New Campaign
           </Button>
         </div>
 
@@ -116,7 +116,7 @@ export default function MyCampaignsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-border p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Total campagnes</p>
+              <p className="text-sm text-gray-500">Total Campaigns</p>
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Layers className="w-4 h-4 text-primary" />
               </div>
@@ -126,7 +126,7 @@ export default function MyCampaignsPage() {
 
           <div className="bg-white rounded-xl border border-border p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Objectif total</p>
+              <p className="text-sm text-gray-500">Total Goal</p>
               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-blue-600" />
               </div>
@@ -139,7 +139,7 @@ export default function MyCampaignsPage() {
 
           <div className="bg-white rounded-xl border border-border p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Collecté</p>
+              <p className="text-sm text-gray-500">Raised</p>
               <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4 text-emerald-600" />
               </div>
@@ -152,7 +152,7 @@ export default function MyCampaignsPage() {
 
           <div className="bg-white rounded-xl border border-border p-5">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">Actives / Terminées</p>
+              <p className="text-sm text-gray-500">Active / Completed</p>
               <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                 <Loader className="w-4 h-4 text-amber-600" />
               </div>
@@ -171,13 +171,13 @@ export default function MyCampaignsPage() {
         <div className="flex gap-4 bg-white p-4 rounded-xl border border-border items-end">
           <div className="flex-1">
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
-              Rechercher
+              Search
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Titre, catégorie ou ID..."
+                placeholder="Title, category or ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
@@ -186,21 +186,21 @@ export default function MyCampaignsPage() {
           </div>
           <div className="w-48">
             <label className="block text-xs font-medium text-gray-500 mb-1.5">
-              Statut
+              Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
             >
-              <option value="all">Tous</option>
-              <option value="draft">Brouillon</option>
-              <option value="pending">En attente</option>
+              <option value="all">All</option>
+              <option value="draft">Draft</option>
+              <option value="pending">Pending</option>
               <option value="active">Active</option>
-              <option value="funded">Financé</option>
-              <option value="completed">Terminé</option>
-              <option value="blocked">Bloqué</option>
-              <option value="rejected">Rejeté</option>
+              <option value="funded">Funded</option>
+              <option value="completed">Completed</option>
+              <option value="blocked">Blocked</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -211,22 +211,22 @@ export default function MyCampaignsPage() {
             <TableHeader>
               <TableRow className="hover:bg-transparent border-b bg-gray-50">
                 <TableHead className="font-semibold text-gray-700">
-                  Titre
+                  Title
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700">
-                  Catégorie
+                  Category
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-right">
-                  Objectif
+                  Goal
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-right">
-                  Collecté
+                  Raised
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-center">
-                  Progression
+                  Progress
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700">
-                  Statut
+                  Status
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-right">
                   Actions
@@ -329,13 +329,13 @@ export default function MyCampaignsPage() {
                       <Layers className="w-10 h-10 text-gray-300" />
                       <p className="text-gray-500 font-medium">
                         {search || statusFilter !== "all"
-                          ? "Aucune campagne trouvée"
-                          : "Vous n'avez pas encore créé de campagne"}
+                          ? "No campaigns found"
+                          : "You haven't created any campaigns yet"}
                       </p>
                       <p className="text-gray-400 text-sm">
                         {search || statusFilter !== "all"
-                          ? "Essayez de modifier vos filtres"
-                          : "Cliquez sur « Nouvelle campagne » pour commencer"}
+                          ? "Try adjusting your filters"
+                          : "Click « New Campaign » to get started"}
                       </p>
                     </div>
                   </TableCell>
