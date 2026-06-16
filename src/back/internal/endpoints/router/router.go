@@ -14,6 +14,7 @@ func New(
 	authHandler *handler.AuthHandler,
 	uploadHandler *handler.UploadHandler,
 	companyHandler *handler.CompanyHandler,
+	adminHandler *handler.AdminHandler,
 	entrepRepo contracts.EntrepreneurRepository,
 ) http.Handler {
 	mux := http.NewServeMux()
@@ -55,11 +56,36 @@ func New(
 	mux.Handle("POST /api/v1/companies/{id}/upload", middleware.AuthRequired(entrepOnly(
 		http.HandlerFunc(companyHandler.UploadDocument),
 	)))
-
 	mux.HandleFunc("GET /api/v1/companies/public", companyHandler.ListPublic)
-
 	mux.Handle("POST /api/v1/companies/{id}/reverify", middleware.AuthRequired(
 		http.HandlerFunc(companyHandler.RequestReverify),
+	))
+
+	mux.HandleFunc("POST /api/v1/admin/login", adminHandler.Login)
+
+	mux.Handle("GET /api/v1/admin/me", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.Me),
+	))
+	mux.Handle("GET /api/v1/admin/companies/pending", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.ListPendingCompanies),
+	))
+	mux.Handle("POST /api/v1/admin/companies/{id}/approve", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.ApproveCompany),
+	))
+	mux.Handle("POST /api/v1/admin/companies/{id}/reject", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.RejectCompany),
+	))
+	mux.Handle("GET /api/v1/admin/entrepreneurs", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.ListEntrepreneurs),
+	))
+	mux.Handle("POST /api/v1/admin/entrepreneurs/{id}/suspend", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.SuspendEntrepreneur),
+	))
+	mux.Handle("POST /api/v1/admin/entrepreneurs/{id}/activate", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.ActivateEntrepreneur),
+	))
+	mux.Handle("GET /api/v1/admin/users", middleware.AdminRequired(
+		http.HandlerFunc(adminHandler.ListUsers),
 	))
 
 	var h http.Handler = mux
