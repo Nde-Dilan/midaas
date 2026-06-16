@@ -64,6 +64,7 @@ func New(
 	mux.Handle("GET /api/v1/projects/{id}/investors", middleware.AuthRequired(http.HandlerFunc(investmentHandler.ListProjectInvestors)))
 	mux.Handle("GET /api/v1/investments/my", middleware.AuthRequired(http.HandlerFunc(investmentHandler.ListMyInvestments)))
 	mux.Handle("GET /api/v1/transactions/my", middleware.AuthRequired(http.HandlerFunc(investmentHandler.MyTransactions)))
+	mux.Handle("GET /api/v1/portfolio", middleware.AuthRequired(http.HandlerFunc(investmentHandler.Portfolio)))
 
 	mux.HandleFunc("POST /api/v1/admin/login", adminHandler.Login)
 	mux.Handle("GET /api/v1/admin/me", middleware.AdminRequired(http.HandlerFunc(adminHandler.Me)))

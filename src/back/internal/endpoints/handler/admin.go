@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/MiltonJ23/Midaas/internal/adapters/pawapay"
 	"github.com/MiltonJ23/Midaas/internal/contracts"
 	"github.com/MiltonJ23/Midaas/internal/domain"
 	"github.com/MiltonJ23/Midaas/internal/logger"
@@ -30,6 +32,7 @@ type AdminHandler struct {
 	milestoneRepo   contracts.MilestoneRepository
 	transactionRepo contracts.TransactionRepository
 	notifSvc        contracts.NotificationService
+	pawaPay         *pawapay.Client
 }
 
 func NewAdminHandler(
@@ -42,6 +45,7 @@ func NewAdminHandler(
 	milestoneRepo contracts.MilestoneRepository,
 	transactionRepo contracts.TransactionRepository,
 	notifSvc contracts.NotificationService,
+	pawaPay *pawapay.Client,
 ) *AdminHandler {
 	return &AdminHandler{
 		adminService:    adminService,
@@ -53,6 +57,7 @@ func NewAdminHandler(
 		milestoneRepo:   milestoneRepo,
 		transactionRepo: transactionRepo,
 		notifSvc:        notifSvc,
+		pawaPay:         pawaPay,
 	}
 }
 
@@ -321,6 +326,44 @@ func (h *AdminHandler) ApproveMilestone(w http.ResponseWriter, r *http.Request) 
 	now := time.Now()
 	milestone.ReviewedAt = &now
 	h.milestoneRepo.Update(ctx, milestone)
+
+	if h.pawaPay != nil {
+		project, _ := h.projectRepo.FindByID(ctx, milestone.ProjectID)
+		if project != nil {
+			entrep, _ := h.entrepRepo.FindByID(ctx, project.EntrepreneurID)
+			if entrep != nil {
+				user, _ := h.userRepo.FindByID(ctx, entrep.UserID)
+				if user != nil && user.PhoneNumber != "" {
+					payoutID := uuid.New().String()
+					pReq := pawapay.PayoutRequest{}
+					pReq.PayoutID = payoutID
+					pReq.Amount = fmt.Sprintf("%.2f", milestone.FundAllocation)
+					pReq.Currency = project.Currency
+					pReq.CustomerMessage = milestone.Title[:min(22, len(milestone.Title))]
+					pReq.Recipient.Type = "MMO"
+					pReq.Recipient.AccountDetails.PhoneNumber = user.PhoneNumber
+					pReq.Recipient.AccountDetails.Provider = "MTN_MOMO_CMR"
+
+					resp, err := h.pawaPay.InitiatePayout(context.Background(), pReq)
+					if err != nil {
+						logger.Error(ctx, "handler: pawapay payout failed", slog.String("error", err.Error()))
+					} else if resp.Status == "ACCEPTED" {
+						tx := &domain.Transaction{
+							ID: uuid.New(), UserID: user.ID,
+							Type: domain.TransactionTypeMilestonePayout, Amount: milestone.FundAllocation,
+							Currency: project.Currency, Direction: domain.TransactionDirectionCredit,
+							Status: domain.TransactionStatusCompleted, GatewayRef: payoutID,
+							Description: fmt.Sprintf("Milestone payout: %s (%s)", milestone.Title, project.Title),
+							CreatedAt: now,
+						}
+						h.transactionRepo.Create(ctx, tx)
+						milestone.PaidAt = &now
+						h.milestoneRepo.Update(ctx, milestone)
+					}
+				}
+			}
+		}
+	}
 
 	if h.notifSvc != nil {
 		go func() {

@@ -58,12 +58,12 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService, notifSvc)
 	uploadHandler := handler.NewUploadHandler(objStorage, userRepo)
 	companyHandler := handler.NewCompanyHandler(companyRepo, entrepRepo, objStorage)
-	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo, companyRepo, projectRepo, milestoneRepo, transactionRepo, notifSvc)
-	projectHandler := handler.NewProjectHandler(projectRepo, milestoneRepo, investmentRepo, transactionRepo, companyRepo, entrepRepo, userRepo, objStorage, notifSvc)
-	investmentHandler := handler.NewInvestmentHandler(investmentRepo, projectRepo, userRepo, transactionRepo, notifSvc, pawaPayClient)
+	adminHandler := handler.NewAdminHandler(adminService, adminRepo, userRepo, entrepRepo, companyRepo, projectRepo, milestoneRepo, transactionRepo, notifSvc, pawaPayClient)
+	projectHandler := handler.NewProjectHandler(projectRepo, milestoneRepo, investmentRepo, transactionRepo, companyRepo, entrepRepo, userRepo, objStorage, notifSvc, pawaPayClient)
+	investmentHandler := handler.NewInvestmentHandler(investmentRepo, projectRepo, userRepo, companyRepo, transactionRepo, notifSvc, pawaPayClient)
 
 	seedAdmin(log, adminRepo, authsvc.NewPasswordHasher())
-	worker.StartAutoCancel(projectRepo, investmentRepo, transactionRepo, notifSvc, log)
+	worker.StartAutoCancel(projectRepo, investmentRepo, transactionRepo, notifSvc, pawaPayClient, log)
 
 	apiRouter := router.New(log, authHandler, uploadHandler, companyHandler, adminHandler, projectHandler, investmentHandler, entrepRepo)
 
