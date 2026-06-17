@@ -58,6 +58,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
   };
 
   const handleStayInvestor = () => {
+    localStorage.setItem("midaas_role", "investor");
     setDismissed(true);
     onDismiss?.();
   };

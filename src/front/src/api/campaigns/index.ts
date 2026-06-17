@@ -254,6 +254,44 @@ export const campaignProvider = {
     );
   },
 
+  /**
+   * POST /milestones/{id}/upload
+   * Upload proof documents for a milestone. Changes status to under_review.
+   */
+  async uploadMilestoneProof(
+    milestoneId: string,
+    files: File[],
+    notes?: string,
+  ) {
+    return await withErrorHandling<{ message: string; status: string }>(
+      async () => {
+        const formData = new FormData();
+        files.forEach((f) => formData.append("files", f));
+        if (notes) formData.append("notes", notes);
+
+        const response = await instance.post(
+          `/milestones/${milestoneId}/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } },
+        );
+
+        if (response.status === 200) {
+          return {
+            status: response.status,
+            data: {
+              message:
+                "Proof documents uploaded — milestone submitted for review",
+              status: "under_review",
+            },
+          };
+        }
+
+        return response;
+      },
+      "Failed to upload milestone proof",
+    );
+  },
+
   async createMilestone(projectId: string, payload: MilestoneBatchDto) {
     return await withErrorHandling<{ message: string; milestone?: Milestone }>(
       async () => {
@@ -309,7 +347,8 @@ export const campaignProvider = {
           return {
             status: response.status,
             data: {
-              message: response.data?.message ?? "Jalon mis à jour avec succès",
+              message:
+                response.data?.message ?? "Milestone updated successfully",
               milestone,
             },
           };
@@ -317,7 +356,7 @@ export const campaignProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la mise à jour du jalon",
+      "An error occurred while updating the milestone",
     );
   },
 
@@ -331,13 +370,13 @@ export const campaignProvider = {
         return {
           status: response.status,
           data: {
-            message: response.data?.message ?? "Jalon supprimé avec succès",
+            message: response.data?.message ?? "Milestone deleted successfully",
           },
         };
       }
 
       return response;
-    }, "Une erreur s'est produite lors de la suppression du jalon");
+    }, "An error occurred while deleting the milestone");
   },
 
   /**
@@ -470,7 +509,57 @@ export const campaignProvider = {
       return { error: err?.message ?? "Failed to load investors" };
     }
   },
+
+  // ─── Portfolio (my investments) ────────────────────────────────
+
+  /**
+   * GET /portfolio
+   * User's portfolio — total value + list of investments with project & company.
+   */
+  async getPortfolio(): Promise<{
+    data?: {
+      total_value: number;
+      currency: string;
+      investments: PortfolioItem[];
+    };
+    error?: string;
+  }> {
+    try {
+      const response = await instance.get("/portfolio");
+
+      if (response.status === 200) {
+        const detail = toObject(response.data);
+        return {
+          data: {
+            total_value: detail?.total_value ?? 0,
+            currency: detail?.currency ?? "XOF",
+            investments: (detail?.investments ?? []) as PortfolioItem[],
+          },
+        };
+      }
+
+      const errorMsg =
+        response.data?.error ??
+        response.data?.message ??
+        "Failed to load portfolio";
+      return { error: errorMsg };
+    } catch (err: any) {
+      return { error: err?.message ?? "Failed to load portfolio" };
+    }
+  },
 };
+
+export interface PortfolioItem {
+  investment_id?: string;
+  project_id?: string;
+  project_title?: string;
+  company_name?: string;
+  project_created?: string;
+  amount?: number;
+  currency?: string;
+  ownership_pct?: number;
+  project_status?: string;
+}
 
 /* ─── Investor Item Interface ──────────── */
 export interface InvestorItem {

@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useModalStore } from "@/store/modal";
 import { Button } from "@/components/atoms/button";
 import { DialogTitle } from "../../modal";
 import { campaignProvider } from "@/api/campaigns";
 import { toast } from "react-toastify";
-import { Loader, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Loader, CheckCircle, XCircle, Globe } from "lucide-react";
+import {
+  detectCountryFromMsisdn,
+  getProvidersForCountry,
+  getCountryName,
+  fetchActiveProviders,
+} from "@/services/pawapay-service";
 
 type Step = "form" | "confirming" | "success" | "error";
-
-const PROVIDERS = [
-  { value: "MTN_MOMO_CMR", label: "MTN Mobile Money" },
-  { value: "ORANGE_CMR", label: "Orange Money" },
-];
 
 export default function InvestModal() {
   const { toggle, data } = useModalStore();
@@ -26,20 +27,61 @@ export default function InvestModal() {
   const [step, setStep] = useState<Step>("form");
   const [amount, setAmount] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [provider, setProvider] = useState("MTN_MOMO_CMR");
+  const [provider, setProvider] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Record<string, any> | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Dynamic provider detection
+  const [availableProviders, setAvailableProviders] = useState<
+    { value: string; label: string; currency: string }[]
+  >([]);
+  const [detectedCountry, setDetectedCountry] = useState<string | null>(null);
+  const [providersLoading, setProvidersLoading] = useState(true);
+
+  // Fetch PawaPay providers on mount
+  useEffect(() => {
+    (async () => {
+      setProvidersLoading(true);
+      await fetchActiveProviders();
+      setProvidersLoading(false);
+    })();
+  }, []);
+
+  // Detect country and update providers when phone number changes
+  useEffect(() => {
+    const digits = phoneNumber.replace(/[^0-9]/g, "");
+    if (digits.length >= 4) {
+      const country = detectCountryFromMsisdn(digits);
+      setDetectedCountry(country);
+      if (country) {
+        const providers = getProvidersForCountry(country);
+        if (providers && providers.length > 0) {
+          setAvailableProviders(providers);
+          // Auto-select first provider if current selection is invalid
+          setProvider((prev) =>
+            providers.some((p) => p.value === prev) ? prev : providers[0].value,
+          );
+          return;
+        }
+      }
+    }
+    setAvailableProviders([]);
+    setDetectedCountry(null);
+  }, [phoneNumber]);
 
   const remaining = fundingGoal - fundingRaised;
   const parsedAmount = parseFloat(amount) || 0;
   const feeAmount = parsedAmount * 0.05;
   const totalCharge = parsedAmount + feeAmount;
+  const digitsOnly = phoneNumber.replace(/[^0-9]/g, "");
   const isValid =
     parsedAmount >= 1000 &&
     parsedAmount <= remaining &&
-    phoneNumber.length >= 8 &&
-    phoneNumber.length <= 15;
+    digitsOnly.length >= 8 &&
+    digitsOnly.length <= 15 &&
+    availableProviders.length > 0 &&
+    provider.length > 0;
 
   const presets = [5000, 10000, 25000, 50000, 100000, 250000].filter(
     (p) => p <= remaining,
@@ -54,7 +96,7 @@ export default function InvestModal() {
       projectId,
       {
         amount: parsedAmount,
-        phone_number: phoneNumber.replace(/[^0-9]/g, ""),
+        phone_number: digitsOnly,
         currency,
         provider,
       },
@@ -178,17 +220,25 @@ export default function InvestModal() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Mobile Money Number
             </label>
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) =>
-                setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))
-              }
-              placeholder="+237690000000"
-              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all"
-            />
+            <div className="relative">
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) =>
+                  setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))
+                }
+                placeholder="+237690000000"
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all"
+              />
+              {detectedCountry && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[11px] text-gray-400">
+                  <Globe className="w-3 h-3" />
+                  <span>{getCountryName(detectedCountry)}</span>
+                </div>
+              )}
+            </div>
             <p className="text-[11px] text-gray-400 mt-1">
-              Enter MSISDN with country code (e.g., 237695000000)
+              Enter number with country code (e.g., 237695000000)
             </p>
           </div>
 
@@ -197,17 +247,39 @@ export default function InvestModal() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Mobile Money Provider
             </label>
-            <select
-              value={provider}
-              onChange={(e) => setProvider(e.target.value)}
-              className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all bg-white appearance-none"
-            >
-              {PROVIDERS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
+            {providersLoading ? (
+              <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-400 border border-gray-200 rounded-xl">
+                <Loader className="w-4 h-4 animate-spin" />
+                <span>Loading providers...</span>
+              </div>
+            ) : availableProviders.length > 0 ? (
+              <select
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all bg-white appearance-none"
+              >
+                {availableProviders.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            ) : phoneNumber.replace(/[^0-9]/g, "").length >= 4 ? (
+              <div className="px-4 py-3 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl">
+                No providers available for this country. Try a different number.
+              </div>
+            ) : (
+              <div className="px-4 py-3 text-sm text-gray-400 border border-gray-200 rounded-xl">
+                Enter your phone number to see available providers
+              </div>
+            )}
+            {detectedCountry && availableProviders.length > 0 && (
+              <p className="text-[11px] text-gray-400 mt-1">
+                {availableProviders.length} provider
+                {availableProviders.length > 1 ? "s" : ""} available in{" "}
+                {getCountryName(detectedCountry)}
+              </p>
+            )}
           </div>
 
           {/* Actions */}

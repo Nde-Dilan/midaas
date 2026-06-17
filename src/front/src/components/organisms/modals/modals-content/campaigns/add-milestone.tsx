@@ -35,7 +35,7 @@ export default function AddMilestoneModal() {
 
   const onSubmit: SubmitHandler<IMilestoneForm> = async (value) => {
     if (!projectId) {
-      toast.error("Erreur: projet non identifié");
+      toast.error("Error: project not identified");
       return;
     }
 
@@ -53,11 +53,11 @@ export default function AddMilestoneModal() {
       await campaignProvider.createMilestone(projectId, payload);
 
     if (responseData?.milestone) {
-      toast.success("Jalon ajouté avec succès");
+      toast.success("Milestone added successfully");
       reset();
       toggle();
     } else {
-      toast.error(error || "Erreur lors de la création du jalon");
+      toast.error(error || "Error creating milestone");
     }
 
     setLoading(false);
@@ -108,11 +108,11 @@ export default function AddMilestoneModal() {
         <Controller
           name="title"
           control={control}
-          rules={{ required: "Le titre est requis" }}
+          rules={{ required: "Title is required" }}
           render={({ field }) => (
             <MUIInput
               {...field}
-              label="Titre du jalon"
+              label="Milestone Title"
               after={<div className="pr-4"></div>}
               className="pl-4"
             />
@@ -125,7 +125,7 @@ export default function AddMilestoneModal() {
           render={({ field }) => (
             <MUITextarea
               {...field}
-              label="Description (optionnelle)"
+              label="Description (optional)"
               className="min-h-[80px]"
               placeholder=" "
             />
@@ -135,12 +135,12 @@ export default function AddMilestoneModal() {
         <Controller
           name="fundAllocation"
           control={control}
-          rules={{ required: "L'allocation est requise" }}
+          rules={{ required: "Allocation is required" }}
           render={({ field }) => (
             <MUIInput
               {...field}
               type="number"
-              label="Montant alloué"
+              label="Fund Allocation"
               after={
                 <div className="pr-4">
                   <span className="text-gray-500 text-sm">XOF</span>
@@ -154,9 +154,7 @@ export default function AddMilestoneModal() {
         <Controller
           name="dueDate"
           control={control}
-          render={({ field }) => (
-            <DatePicker {...field} label="Date d'échéance" />
-          )}
+          render={({ field }) => <DatePicker {...field} label="Due Date" />}
         />
 
         <div className="mt-4 pt-4 border-t border-border flex items-center justify-end gap-3">
@@ -168,13 +166,13 @@ export default function AddMilestoneModal() {
               toggle();
             }}
           >
-            Annuler
+            Cancel
           </Button>
           <Button type="submit" disabled={loading || !isFormValid()}>
             {loading ? (
               <Loader className="animate-spin w-4 h-4" />
             ) : (
-              "Ajouter le jalon"
+              "Add Milestone"
             )}
           </Button>
         </div>
