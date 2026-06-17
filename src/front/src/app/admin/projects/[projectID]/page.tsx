@@ -34,11 +34,16 @@ export default function ProjectDetailPage() {
   const projectID = params?.projectID as string;
   const { openModal } = useModalStore();
 
+  const { user } = useAuthStore();
+  const isEntrepreneur = user?.isEntrepreneur ?? false;
+
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [isFavorited, setIsFavorited] = useState(false);
+
+  const backLink = isEntrepreneur ? "/admin/my-campaigns" : "/admin/projects";
 
   // Investors
   const [investors, setInvestors] = useState<InvestorItem[]>([]);
@@ -155,10 +160,6 @@ export default function ProjectDetailPage() {
       </div>
     );
   }
-
-  const { user } = useAuthStore();
-  const isEntrepreneur = user?.isEntrepreneur ?? false;
-  const backLink = isEntrepreneur ? "/admin/my-campaigns" : "/admin/projects";
 
   const pct = progress();
   const canInvest =
