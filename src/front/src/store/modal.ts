@@ -65,6 +65,9 @@ export const ModalNames = {
 
   // Company
   ADD_COMPANY: "add-company",
+
+  // Investment
+  INVEST_MODAL: "invest-modal",
 } as const;
 
 export type ModalNamesType = (typeof ModalNames)[keyof typeof ModalNames];

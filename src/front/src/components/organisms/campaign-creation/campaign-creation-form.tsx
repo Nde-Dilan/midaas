@@ -475,8 +475,21 @@ export default function CampaignCreationForm({ campaign, onComplete }: Props) {
         const { data, error } = await campaignProvider.create(payload);
 
         if (data?.project) {
-          toast.success(data.message || "Campaign created successfully");
-          addCampaign(data.project);
+          const created = data.project;
+          addCampaign(created);
+
+          // Auto-submit for validation (draft → pending)
+          const { error: submitError } =
+            await campaignProvider.submitForValidation(created.id);
+
+          if (submitError) {
+            toast.warning(
+              "Campaign created but auto-submission failed — you can submit it manually from the campaigns list.",
+            );
+          } else {
+            toast.success("Campaign created and submitted for validation!");
+          }
+
           onComplete();
         } else {
           toast.error(error || "Failed to create campaign");

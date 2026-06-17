@@ -621,6 +621,190 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /companies/{id}/legal-docs:
+    put:
+      summary: Enregistrer les documents legaux d'une entreprise
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rccm_number: { type: string }
+                rccm_expiry_date: { type: string }
+                rccm_docs: { type: array, items: { type: string } }
+                niu_number: { type: string }
+                niu_doc_url: { type: string }
+                statuts_docs: { type: array, items: { type: string } }
+                localisation_doc_url: { type: string }
+                premises_photos: { type: array, items: { type: string } }
+                sector_permits: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: Documents legaux sauvegardes
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /companies/{id}/financials:
+    put:
+      summary: Enregistrer les donnees financieres d'une entreprise
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dsf_years: { type: array, items: { type: integer } }
+                dsf_stamped_docs: { type: array, items: { type: string } }
+                anr_issue_date: { type: string }
+                anr_expiry_date: { type: string }
+                anr_doc_url: { type: string }
+                cnps_clearance_url: { type: string }
+                bank_statements: { type: array, items: { type: string } }
+                momo_statements: { type: array, items: { type: string } }
+      responses:
+        "200":
+          description: Donnees financieres sauvegardees
+
+  /companies/{id}/operations:
+    put:
+      summary: Enregistrer les donnees operationnelles
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                top_suppliers: {}
+                top_clients: {}
+                collateral_type: { type: string }
+                collateral_proof_docs: { type: array, items: { type: string } }
+                continuity_infrastructure: { type: string }
+      responses:
+        "200":
+          description: Donnees operationnelles sauvegardees
+
+  /companies/{id}/beneficial-owners:
+    post:
+      summary: Ajouter un actionnaire
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [full_name, equity_percentage]
+              properties:
+                full_name: { type: string }
+                equity_percentage: { type: number }
+                identity_docs: { type: array, items: { type: string } }
+      responses:
+        "201":
+          description: Actionnaire ajoute
+
+  /companies/{id}/beneficial-owners/{ownerId}:
+    delete:
+      summary: Supprimer un actionnaire
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: ownerId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Actionnaire supprime
+
+  /companies/{id}/managers:
+    post:
+      summary: Ajouter un dirigeant
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [full_name]
+              properties:
+                full_name: { type: string }
+                role: { type: string }
+                identity_docs: { type: array, items: { type: string } }
+                casier_judiciaire_url: { type: string }
+                casier_judiciaire_date: { type: string }
+                cv_url: { type: string }
+      responses:
+        "201":
+          description: Dirigeant ajoute
+
+  /companies/{id}/managers/{managerId}:
+    delete:
+      summary: Supprimer un dirigeant
+      tags: [companies]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: managerId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Dirigeant supprime
 
   /admin/login:
     post:
@@ -1008,10 +1192,11 @@ paths:
 
   /projects/{id}/invest:
     post:
-      summary: Investir dans un projet
+      summary: Investir dans un projet via PawaPay (MMO)
       description: |
-        Confirme immediatement. Un email est envoye avec le dossier complet:
-        ROI, break-even, risques, analyse de marche, avantage concurrentiel.
+        Initie un depot PawaPay. Le statut PawaPay est retourne dans `pawapay_status`.
+        Fee plateforme 5% ajoutee au montant investi. Un email est envoye avec le
+        dossier complet: ROI, break-even, risques, analyse de marche.
       tags: [investments]
       security:
         - bearerAuth: []
@@ -1026,15 +1211,71 @@ paths:
           application/json:
             schema:
               type: object
-              required: [amount]
+              required: [amount, phone_number]
               properties:
                 amount:
                   type: number
+                  example: 200000
                 currency:
                   type: string
+                  example: XOF
+                phone_number:
+                  type: string
+                  description: Numero MSISDN (sans +, sans espaces)
+                  example: "237695000000"
+                provider:
+                  type: string
+                  description: Code MMO (ex. MTN_MOMO_CMR, ORANGE_CMR)
+                  example: MTN_MOMO_CMR
       responses:
         "201":
-          description: Investissement enregistre
+          description: Investissement enregistre + depot PawaPay initie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  invested_amount: 200000
+                  platform_fee_pct: 5
+                  platform_fee_amt: 10000
+                  total_charge: 210000
+                  remaining: 300000
+                  funding_progress: "40.0%"
+                  deposit_id: "638ae5e5-b9a1-..."
+                  pawapay_status: "ACCEPTED"
+                  provider: "MTN_MOMO_CMR"
+
+  /portfolio:
+    get:
+      summary: Portfolio de l'utilisateur
+      description: Valeur totale + liste des investissements avec projet, company, ownership.
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Portfolio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  total_value: 350000
+                  currency: XOF
+                  investments:
+                    - investment_id: "ddcc759c-..."
+                      project_id: "b825f55f-..."
+                      project_title: "Ferme Bio Midaas"
+                      company_name: "FredTech SARL"
+                      project_created: "2026-06-16"
+                      amount: 200000
+                      currency: XOF
+                      ownership_pct: 40.0
+                      project_status: "active"
 
   /projects/{id}/investors:
     get:
@@ -1060,6 +1301,27 @@ paths:
       responses:
         "200":
           description: Liste de mes investissements
+
+  /transactions/my:
+    get:
+      summary: Mes transactions
+      description: Tous les logs de transactions (investissement, fee, refund, payout)
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste des transactions
+
+  /admin/transactions:
+    get:
+      summary: Toutes les transactions (admin)
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste de toutes les transactions de la plateforme
 
   /milestones/{id}/upload:
     post:
@@ -1345,6 +1607,3 @@ tags:
     description: Administration (validation, gestion)
   - name: system
     description: Health check
-
-
-

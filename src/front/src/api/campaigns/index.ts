@@ -339,4 +339,147 @@ export const campaignProvider = {
       return response;
     }, "Une erreur s'est produite lors de la suppression du jalon");
   },
+
+  /**
+   * POST /projects/{id}/submit
+   * Submit a project for admin validation (draft → pending).
+   */
+  async submitForValidation(id: string) {
+    return await withErrorHandling<{
+      id: string;
+      status: string;
+      message: string;
+    }>(async () => {
+      const response = await instance.post(`/projects/${id}/submit`);
+
+      if (response.status === 200) {
+        const detail = toObject(response.data) ?? response.data;
+        return {
+          status: response.status,
+          data: {
+            id: detail.id ?? id,
+            status: detail.status ?? "pending",
+            message: detail.message ?? "Project submitted for validation",
+          },
+        };
+      }
+
+      return response;
+    }, "Failed to submit project for validation");
+  },
+
+  // ─── Public Projects (investor-facing) ─────────────────────────
+
+  /**
+   * GET /projects/public
+   * Public — paginated list of approved projects with filters.
+   */
+  async getPublicProjects(params?: {
+    category?: string;
+    status?: string;
+    currency?: string;
+    query?: string;
+    min_goal?: number;
+    max_goal?: number;
+    page?: number;
+    page_size?: number;
+  }) {
+    return await withErrorHandling<{
+      data: DiscoverProjectItem[];
+      meta?: { total: number; page: number; page_size: number };
+    }>(async () => {
+      const response = await instance.get("/projects/public", { params });
+
+      if (response.status === 200) {
+        return {
+          status: response.status,
+          data: {
+            data: toArray(response.data),
+            meta: response.data?.meta,
+          },
+        };
+      }
+
+      return response;
+    }, "Unable to load projects");
+  },
+
+  // ─── Invest in a Project ───────────────────────────────────────
+
+  /**
+   * POST /projects/{id}/invest
+   * Initiate an investment via PawaPay (MMO).
+   */
+  async investInProject(
+    id: string,
+    payload: {
+      amount: number;
+      phone_number: string;
+      currency?: string;
+      provider?: string;
+    },
+  ) {
+    return await withErrorHandling<{
+      invested_amount: number;
+      platform_fee_pct: number;
+      platform_fee_amt: number;
+      total_charge: number;
+      remaining: number;
+      funding_progress: string;
+      deposit_id: string;
+      pawapay_status: string;
+      provider: string;
+    }>(async () => {
+      const response = await instance.post(`/projects/${id}/invest`, payload);
+
+      if (response.status === 201) {
+        const detail = toObject(response.data);
+        return {
+          status: response.status,
+          data: detail as any,
+        };
+      }
+
+      return response;
+    }, "Failed to process investment");
+  },
+
+  // ─── Project Investors ─────────────────────────────────────────
+
+  /**
+   * GET /projects/{id}/investors
+   * List investors for a project (name, amount, ownership %).
+   */
+  async getInvestors(
+    id: string,
+  ): Promise<{ data?: InvestorItem[]; error?: string }> {
+    try {
+      const response = await instance.get(`/projects/${id}/investors`);
+
+      if (response.status === 200) {
+        const items = toArray(response.data);
+        return { data: items as InvestorItem[] };
+      }
+
+      const errorMsg =
+        response.data?.error ??
+        response.data?.message ??
+        "Failed to load investors";
+      return { error: errorMsg };
+    } catch (err: any) {
+      return { error: err?.message ?? "Failed to load investors" };
+    }
+  },
 };
+
+/* ─── Investor Item Interface ──────────── */
+export interface InvestorItem {
+  investment_id?: string;
+  user_id?: string;
+  full_name?: string;
+  amount?: number;
+  ownership_pct?: number;
+  currency?: string;
+  platform_fee_pct?: number;
+  invested_at?: string;
+}

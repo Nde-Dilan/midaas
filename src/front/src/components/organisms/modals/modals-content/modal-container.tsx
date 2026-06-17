@@ -29,6 +29,7 @@ import CampaignDetailsModal from "./campaigns/campaign-details";
 import AddMilestoneModal from "./campaigns/add-milestone";
 import AddCompanyModal from "./dashboard/add-company";
 import ConfirmActionModal from "./admin/confirm-action";
+import InvestModal from "./investment/invest-modal";
 
 export default function ModalContainer() {
   const { open, toggle, name } = useModalStore();
@@ -149,6 +150,10 @@ export default function ModalContainer() {
 
       case ModalNames.CONFIRM_ACTION: {
         return <ConfirmActionModal />;
+      }
+
+      case ModalNames.INVEST_MODAL: {
+        return <InvestModal />;
       }
 
       default:
