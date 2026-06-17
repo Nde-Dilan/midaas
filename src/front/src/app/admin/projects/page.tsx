@@ -81,7 +81,7 @@ export default function ProjectsPage() {
   if (loading) {
     return (
       <div className="p-6 min-h-screen flex items-center justify-center">
-        <Loader className="w-8 h-8 animate-spin text-[#00CCC0]" />
+        <Loader className="w-8 h-8 animate-spin text-[#50E3C2]" />
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function ProjectsPage() {
           <p className="text-gray-500 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 text-sm text-[#00CCC0] hover:underline font-MontserratSemiBold"
+            className="mt-4 text-sm text-[#50E3C2] hover:underline font-MontserratSemiBold"
           >
             Try again
           </button>
@@ -123,7 +123,7 @@ export default function ProjectsPage() {
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "grid"
-                ? "text-[#00CCC0] bg-[#00CCC0]/10"
+                ? "text-[#50E3C2] bg-[#50E3C2]/10"
                 : "text-gray-400 hover:text-gray-600"
             }`}
             title="Grid view"
@@ -134,7 +134,7 @@ export default function ProjectsPage() {
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "list"
-                ? "text-[#00CCC0] bg-[#00CCC0]/10"
+                ? "text-[#50E3C2] bg-[#50E3C2]/10"
                 : "text-gray-400 hover:text-gray-600"
             }`}
             title="List view"
@@ -163,7 +163,7 @@ export default function ProjectsPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 selectedCategory === cat
-                  ? "bg-[#00CCC0] text-white"
+                  ? "bg-[#50E3C2] text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -185,7 +185,7 @@ export default function ProjectsPage() {
               setSearchQuery("");
               setSelectedCategory("All");
             }}
-            className="mt-3 text-xs text-[#00CCC0] hover:underline"
+            className="mt-3 text-xs text-[#50E3C2] hover:underline"
           >
             Reset filters
           </button>
@@ -204,10 +204,10 @@ export default function ProjectsPage() {
               <div
                 key={project.id}
                 onClick={() => router.push(`/admin/projects/${project.id}`)}
-                className="group bg-white border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:border-[#00CCC0]/30 transition-all cursor-pointer flex flex-col"
+                className="group bg-white border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:border-[#50E3C2]/30 transition-all cursor-pointer flex flex-col"
               >
                 {/* Cover image placeholder */}
-                <div className="h-36 bg-gradient-to-br from-[#00CCC0]/5 to-[#00CCC0]/20 relative flex items-center justify-center">
+                <div className="h-36 bg-gradient-to-br from-[#50E3C2]/5 to-[#50E3C2]/20 relative flex items-center justify-center">
                   {project.cover_image_url ? (
                     <img
                       src={project.cover_image_url}
@@ -238,7 +238,7 @@ export default function ProjectsPage() {
                 </div>
 
                 <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="font-MontserratSemiBold text-sm text-foreground group-hover:text-[#00CCC0] transition-colors line-clamp-1 mb-1">
+                  <h3 className="font-MontserratSemiBold text-sm text-foreground group-hover:text-[#50E3C2] transition-colors line-clamp-1 mb-1">
                     {project.title}
                   </h3>
                   {project.company && (
@@ -306,7 +306,7 @@ export default function ProjectsPage() {
                       {project.investor_count ?? 0} investor
                       {project.investor_count !== 1 ? "s" : ""}
                     </span>
-                    <span className="text-[11px] font-MontserratSemiBold text-[#00CCC0] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[11px] font-MontserratSemiBold text-[#50E3C2] flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       View details
                       <svg
                         width="12"
@@ -354,7 +354,7 @@ export default function ProjectsPage() {
                   >
                     <TableCell className="pl-6">
                       <div className="flex flex-col">
-                        <span className="font-MontserratSemiBold text-sm text-foreground group-hover:text-[#00CCC0] transition-colors line-clamp-1">
+                        <span className="font-MontserratSemiBold text-sm text-foreground group-hover:text-[#50E3C2] transition-colors line-clamp-1">
                           {project.title}
                         </span>
                       </div>

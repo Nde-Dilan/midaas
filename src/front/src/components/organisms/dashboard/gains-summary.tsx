@@ -52,7 +52,7 @@ export default function GainsSummary({
       <div>
         <div className="text-sm text-gray-500 mb-1">Total obtenu</div>
         <h2 className="text-lg font-MontserratBold">Gains</h2>
-        <div className="text-3xl font-MontserratBold text-[#00CCC0] mt-2">
+        <div className="text-3xl font-MontserratBold text-[#50E3C2] mt-2">
           {totalAmount} {currency}
         </div>
         <p className="text-sm text-gray-500 mt-2">{comparisonText}</p>
@@ -76,7 +76,7 @@ export default function GainsSummary({
               cx="96"
               cy="96"
               r={radius}
-              stroke="#00CCC0"
+              stroke="#50E3C2"
               strokeWidth="20"
               fill="none"
               strokeDasharray={circumference}

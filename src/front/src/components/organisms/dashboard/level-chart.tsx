@@ -51,7 +51,7 @@ export default function LevelChart({
             >
               <div
                 className={`w-full rounded-t-lg transition-all duration-300 min-h-[10px] ${
-                  isVolume ? "bg-[#00CCC0]" : "bg-[#4FB3D9]"
+                  isVolume ? "bg-[#50E3C2]" : "bg-[#4FB3D9]"
                 }`}
                 style={{ height: `${heightPercentage}%` }}
                 title={`${item.label}: ${item.value}`}
@@ -62,7 +62,7 @@ export default function LevelChart({
       </div>
       <div className="flex items-center justify-center gap-6 mt-6">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#00CCC0]" />
+          <div className="w-3 h-3 rounded-full bg-[#50E3C2]" />
           <span className="text-sm text-gray-600">Volume</span>
         </div>
         <div className="flex items-center gap-2">

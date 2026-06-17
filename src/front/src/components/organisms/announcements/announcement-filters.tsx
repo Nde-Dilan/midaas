@@ -60,7 +60,7 @@ export default function AnnouncementFilters({
               value={filters.search}
               onChange={(e) => handleChange("search", e.target.value)}
               placeholder="Titre, localisation..."
-              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00CCC0] focus:border-transparent"
+              className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#50E3C2] focus:border-transparent"
             />
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -87,7 +87,7 @@ export default function AnnouncementFilters({
           <select
             value={filters.type}
             onChange={(e) => handleChange("type", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00CCC0] focus:border-transparent bg-white"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#50E3C2] focus:border-transparent bg-white"
           >
             <option value="all">Tous les types</option>
             <option value="appartement">Appartement</option>
@@ -106,7 +106,7 @@ export default function AnnouncementFilters({
           <select
             value={filters.status}
             onChange={(e) => handleChange("status", e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00CCC0] focus:border-transparent bg-white"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#50E3C2] focus:border-transparent bg-white"
           >
             <option value="all">Tous les statuts</option>
             <option value="active">Actif</option>
@@ -121,7 +121,7 @@ export default function AnnouncementFilters({
           <p className="text-sm text-gray-600">Filtres actifs</p>
           <button
             onClick={handleReset}
-            className="text-sm text-[#00CCC0] hover:underline font-medium"
+            className="text-sm text-[#50E3C2] hover:underline font-medium"
           >
             Réinitialiser les filtres
           </button>

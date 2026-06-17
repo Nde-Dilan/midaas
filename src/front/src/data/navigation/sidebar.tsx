@@ -313,6 +313,32 @@ export const sidebar: SidebarItem[] = [
   },
   {
     key: 8,
+    title: "Transactions",
+    link: "/admin/transactions",
+    allowedRoles: ["ROLE_ADMIN"],
+    icon: {
+      default: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5E0E08" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+          <polyline points="7 8 12 4 17 8"></polyline>
+          <polyline points="7 12 12 16 17 12"></polyline>
+        </svg>
+      ),
+      active: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+          <polyline points="7 8 12 4 17 8"></polyline>
+          <polyline points="7 12 12 16 17 12"></polyline>
+        </svg>
+      ),
+    },
+  },
+  {
+    key: 9,
     title: "Users",
     link: "/admin/users",
     allowedRoles: ["ROLE_ADMIN"],

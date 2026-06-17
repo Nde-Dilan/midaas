@@ -60,7 +60,7 @@ const MUIInput = React.forwardRef<
               : undefined
           }
           className={twMerge(
-            "w-full disabled:opacity-50 disabled:cursor-not-allowed text-md bg-white placeholder:text-gray-500 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md py-3 px-3 block appearance-none leading-normal focus:border-[#00CCC0]",
+            "w-full disabled:opacity-50 disabled:cursor-not-allowed text-md bg-white placeholder:text-gray-500 focus:outline-none focus:shadow-outline border border-gray-300 rounded-md py-3 px-3 block appearance-none leading-normal focus:border-[#50E3C2]",
             className,
           )}
           {...props}

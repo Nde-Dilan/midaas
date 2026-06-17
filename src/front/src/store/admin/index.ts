@@ -6,6 +6,7 @@ import type {
   AdminUserItem,
   AdminProjectItem,
   AdminMilestoneItem,
+  AdminTransactionItem,
 } from "@/api/admin";
 
 type State = {
@@ -32,6 +33,10 @@ type State = {
   // Milestones
   pendingMilestones: AdminMilestoneItem[];
   pendingMilestonesLoading: boolean;
+
+  // Transactions
+  transactions: AdminTransactionItem[];
+  transactionsLoading: boolean;
 };
 
 type Actions = {
@@ -62,6 +67,10 @@ type Actions = {
   setPendingMilestones: (milestones: AdminMilestoneItem[]) => void;
   setPendingMilestonesLoading: (loading: boolean) => void;
   updateMilestoneStatus: (id: string, status: string) => void;
+
+  // Transactions
+  setTransactions: (transactions: AdminTransactionItem[]) => void;
+  setTransactionsLoading: (loading: boolean) => void;
 };
 
 export const useAdminStore = create<State & Actions>((set) => ({
@@ -78,6 +87,8 @@ export const useAdminStore = create<State & Actions>((set) => ({
   pendingProjectsLoading: false,
   pendingMilestones: [],
   pendingMilestonesLoading: false,
+  transactions: [],
+  transactionsLoading: false,
 
   // Auth
   loadAdmin(admin) {
@@ -153,5 +164,13 @@ export const useAdminStore = create<State & Actions>((set) => ({
         m.id === id ? { ...m, status } : m,
       ),
     }));
+  },
+
+  // Transactions
+  setTransactions(transactions) {
+    set({ transactions, transactionsLoading: false });
+  },
+  setTransactionsLoading(loading) {
+    set({ transactionsLoading: loading });
   },
 }));

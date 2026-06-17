@@ -240,6 +240,33 @@ export interface AdminProjectItem {
   investor_count?: number;
 }
 
+/* ═══════════════════════════════════════════════
+   Transaction types
+   ═══════════════════════════════════════════════ */
+
+export interface AdminTransactionItem {
+  id: string;
+  user_id?: string;
+  project_id?: string;
+  type?: string;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  provider?: string;
+  pawapay_status?: string;
+  deposit_id?: string;
+  phone_number?: string;
+  user?: {
+    id: string;
+    email?: string;
+    full_name?: string;
+    phone_number?: string;
+  };
+  metadata?: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 /* ───────────────────────────────────────────────
    Admin API Provider
    ─────────────────────────────────────────────── */
@@ -656,6 +683,31 @@ export const adminProvider = {
       "Failed to reject milestone",
       "Milestone rejected, feedback sent",
     );
+  },
+
+  /* ═══════════════════════════════════════════════
+     Transactions
+     ═══════════════════════════════════════════════ */
+
+  /**
+   * GET /admin/transactions
+   * List all platform transactions (investments, fees, refunds, payouts).
+   */
+  async getTransactions() {
+    return await withErrorHandling<AdminTransactionItem[]>(async () => {
+      const response = await instance.get("/admin/transactions", {
+        headers: getAdminAuthHeader(),
+      });
+
+      if (response.status === 200) {
+        return {
+          status: response.status,
+          data: toArray(response.data),
+        };
+      }
+
+      return response;
+    }, "Failed to load transactions");
   },
 
   /**

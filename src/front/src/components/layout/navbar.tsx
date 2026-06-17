@@ -103,7 +103,7 @@ export default function Navbar({ onOpen, sidebarCollapsed }: Props) {
   if (!user) return null;
 
   return (
-    <header className="w-full h-16 bg-[#00CCC0] px-6 flex items-center justify-between">
+    <header className="w-full h-16 bg-[#50E3C2] px-6 flex items-center justify-between">
       {/* Mobile menu toggle */}
       <div
         className={

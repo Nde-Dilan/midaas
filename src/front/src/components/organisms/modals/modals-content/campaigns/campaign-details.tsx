@@ -178,7 +178,7 @@ export default function CampaignDetailsModal() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             stroke="currentColor"
-            className="text-[#00CCC0]"
+            className="text-[#50E3C2]"
           >
             <path
               d="M6 18L18 6M6 6L18 18"

@@ -355,7 +355,7 @@ export default function AdminCompanyReviewPage() {
                   <span
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-MontserratBold transition-all ${
                       isActive
-                        ? "bg-[#00CCC0] text-white shadow-lg shadow-[#00CCC0]/20"
+                        ? "bg-[#50E3C2] text-white shadow-lg shadow-[#50E3C2]/20"
                         : isDone
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-gray-100 text-gray-400"

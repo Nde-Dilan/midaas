@@ -304,7 +304,7 @@ export default function Home() {
             />
 
             <Button
-              className="w-full h-11 rounded-lg mt-4  text-black bg-[#00CCC0] hover:bg-primary/90 font-semibold"
+              className="w-full h-11 rounded-lg mt-4  text-black bg-[#50E3C2] hover:bg-primary/90 font-semibold"
               type="submit"
               disabled={loading}
             >

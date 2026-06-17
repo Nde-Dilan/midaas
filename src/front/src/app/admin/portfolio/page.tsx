@@ -54,7 +54,7 @@ export default function PortfolioPage() {
   if (loading) {
     return (
       <div className="p-6 min-h-screen flex items-center justify-center">
-        <Loader className="w-8 h-8 animate-spin text-[#00CCC0]" />
+        <Loader className="w-8 h-8 animate-spin text-[#50E3C2]" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function PortfolioPage() {
           <p className="text-gray-500 text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 text-sm text-[#00CCC0] hover:underline font-MontserratSemiBold"
+            className="mt-4 text-sm text-[#50E3C2] hover:underline font-MontserratSemiBold"
           >
             Try again
           </button>
@@ -97,8 +97,8 @@ export default function PortfolioPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-border rounded-2xl p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#00CCC0]/10 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-[#00CCC0]" />
+            <div className="w-10 h-10 rounded-xl bg-[#50E3C2]/10 flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-[#50E3C2]" />
             </div>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               Total Invested
@@ -172,7 +172,7 @@ export default function PortfolioPage() {
           </p>
           <button
             onClick={() => router.push("/admin/projects")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-xl hover:bg-[#00c800] transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#50E3C2] rounded-xl hover:bg-[#00c800] transition-colors"
           >
             Explore Projects
             <ArrowUpRight className="w-4 h-4" />
@@ -187,14 +187,14 @@ export default function PortfolioPage() {
                 inv.project_id &&
                 router.push(`/admin/projects/${inv.project_id}`)
               }
-              className="bg-white border border-border rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#00CCC0]/20 transition-all cursor-pointer"
+              className="bg-white border border-border rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-[#50E3C2]/20 transition-all cursor-pointer"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 {/* Left: project info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00CCC0]/10 to-[#00CCC0]/20 flex items-center justify-center shrink-0">
-                      <Briefcase className="w-5 h-5 text-[#00CCC0]" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#50E3C2]/10 to-[#50E3C2]/20 flex items-center justify-center shrink-0">
+                      <Briefcase className="w-5 h-5 text-[#50E3C2]" />
                     </div>
                     <div className="min-w-0">
                       <h3 className="text-sm font-MontserratSemiBold text-foreground truncate">
@@ -242,7 +242,7 @@ export default function PortfolioPage() {
                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">
                         Ownership
                       </span>
-                      <span className="inline-block px-2 py-0.5 text-[11px] font-MontserratSemiBold bg-[#00CCC0]/10 text-[#00CCC0] rounded-full">
+                      <span className="inline-block px-2 py-0.5 text-[11px] font-MontserratSemiBold bg-[#50E3C2]/10 text-[#50E3C2] rounded-full">
                         {inv.ownership_pct.toFixed(2)}%
                       </span>
                     </div>

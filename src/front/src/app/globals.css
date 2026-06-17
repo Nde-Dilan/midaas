@@ -29,8 +29,8 @@ body {
     --card-foreground: #000000;
     --popover: #ffffff;
     --popover-foreground: #000000;
-    --primary: #00ccc0;
-    --primary-dark: #00ccc0;
+    --primary: #50e3c2;
+    --primary-dark: #50e3c2;
     --primary-foreground: #ffffff;
     --secondary: #f5f5f5;
     --secondary-foreground: #333333;
@@ -42,8 +42,8 @@ body {
     --destructive-foreground: #ffffff;
     --border: #e6e6e6;
     --input: #e6e6e6;
-    --ring: #00ccc0;
-    --chart-1: #00ccc0;
+    --ring: #50e3c2;
+    --chart-1: #50e3c2;
     --chart-2: #999999;
     --chart-3: #666666;
     --chart-4: #cccccc;

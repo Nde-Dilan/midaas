@@ -29,19 +29,19 @@ export default function LandingPage() {
             <nav className="hidden md:flex items-center gap-8">
               <Link
                 href="/#features"
-                className="text-sm text-gray-600 hover:text-[#00CCC0] transition-colors font-MontserratRegular"
+                className="text-sm text-gray-600 hover:text-[#50E3C2] transition-colors font-MontserratRegular"
               >
                 Features
               </Link>
               <Link
                 href="/#how-it-works"
-                className="text-sm text-gray-600 hover:text-[#00CCC0] transition-colors font-MontserratRegular"
+                className="text-sm text-gray-600 hover:text-[#50E3C2] transition-colors font-MontserratRegular"
               >
                 How It Works
               </Link>
               <Link
                 href="/explore"
-                className="text-sm text-gray-600 hover:text-[#00CCC0] transition-colors font-MontserratRegular"
+                className="text-sm text-gray-600 hover:text-[#50E3C2] transition-colors font-MontserratRegular"
               >
                 Explore Projects
               </Link>
@@ -51,13 +51,13 @@ export default function LandingPage() {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/auth/signin"
-                className="px-5 py-2 text-sm font-MontserratSemiBold text-gray-700 hover:text-[#00CCC0] transition-colors"
+                className="px-5 py-2 text-sm font-MontserratSemiBold text-gray-700 hover:text-[#50E3C2] transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full hover:bg-[#00c800] transition-colors shadow-sm"
+                className="px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#50E3C2] rounded-full hover:bg-[#00c800] transition-colors shadow-sm"
               >
                 Get Started
               </Link>
@@ -132,7 +132,7 @@ export default function LandingPage() {
             <Link
               href="/auth/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-center text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full py-2.5"
+              className="block text-center text-sm font-MontserratSemiBold text-white bg-[#50E3C2] rounded-full py-2.5"
             >
               Get Started
             </Link>
@@ -144,18 +144,18 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
         {/* Subtle background decoration */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#00CCC0]/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#00CCC0]/5 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#50E3C2]/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#50E3C2]/5 rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
-            <span className="inline-block px-4 py-1.5 mb-6 text-xs font-MontserratSemiBold text-[#00CCC0] bg-[#00CCC0]/10 rounded-full tracking-wide uppercase">
+            <span className="inline-block px-4 py-1.5 mb-6 text-xs font-MontserratSemiBold text-[#50E3C2] bg-[#50E3C2]/10 rounded-full tracking-wide uppercase">
               Inclusive Investment in Africa
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-MontserratBold text-gray-900 leading-tight tracking-tight">
               Invest in Local{" "}
-              <span className="text-[#00CCC0]">African Businesses</span>{" "}
+              <span className="text-[#50E3C2]">African Businesses</span>{" "}
               Transparently
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
@@ -166,7 +166,7 @@ export default function LandingPage() {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#00CCC0]/25"
+                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-white bg-[#50E3C2] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#50E3C2]/25"
               >
                 Start Investing
                 <svg
@@ -184,7 +184,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#00CCC0] hover:text-[#00CCC0] transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#50E3C2] hover:text-[#50E3C2] transition-colors"
               >
                 Explore Projects
               </Link>
@@ -210,9 +210,9 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="group relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-[#00CCC0]/20 transition-all duration-300"
+                className="group relative bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-[#50E3C2]/20 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#00CCC0]/10 flex items-center justify-center mb-5 group-hover:bg-[#00CCC0]/20 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#50E3C2]/10 flex items-center justify-center mb-5 group-hover:bg-[#50E3C2]/20 transition-colors">
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-MontserratSemiBold text-gray-900 mb-3">
@@ -242,12 +242,12 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-4 gap-8 relative">
             {/* Connector line (desktop) */}
-            <div className="hidden md:block absolute top-12 left-[12.5%] right-[12.5%] h-[2px] bg-[#00CCC0]/20" />
+            <div className="hidden md:block absolute top-12 left-[12.5%] right-[12.5%] h-[2px] bg-[#50E3C2]/20" />
 
             {steps.map((step, i) => (
               <div key={i} className="relative text-center">
-                <div className="w-24 h-24 mx-auto rounded-full bg-[#00CCC0]/10 flex items-center justify-center mb-6 relative z-10">
-                  <span className="text-2xl font-MontserratBold text-[#00CCC0]">
+                <div className="w-24 h-24 mx-auto rounded-full bg-[#50E3C2]/10 flex items-center justify-center mb-6 relative z-10">
+                  <span className="text-2xl font-MontserratBold text-[#50E3C2]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
@@ -264,7 +264,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── STATS BANNER ────────────────────── */}
-      <section className="py-16 bg-[#00CCC0]">
+      <section className="py-16 bg-[#50E3C2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map((stat, i) => (
@@ -293,13 +293,13 @@ export default function LandingPage() {
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/auth/signup"
-                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#00CCC0]/25"
+                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-white bg-[#50E3C2] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#50E3C2]/25"
               >
                 Create Your Account
               </Link>
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#00CCC0] hover:text-[#00CCC0] transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#50E3C2] hover:text-[#50E3C2] transition-colors"
               >
                 Browse Projects
               </Link>
@@ -327,19 +327,19 @@ export default function LandingPage() {
             <div className="flex items-center gap-6">
               <Link
                 href="/explore"
-                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#50E3C2] transition-colors"
               >
                 Projects
               </Link>
               <Link
                 href="/auth/signin"
-                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#50E3C2] transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#50E3C2] transition-colors"
               >
                 Sign Up
               </Link>
@@ -361,7 +361,7 @@ const features = [
         height="24"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#00CCC0"
+        stroke="#50E3C2"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -381,7 +381,7 @@ const features = [
         height="24"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#00CCC0"
+        stroke="#50E3C2"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -403,7 +403,7 @@ const features = [
         height="24"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#00CCC0"
+        stroke="#50E3C2"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"

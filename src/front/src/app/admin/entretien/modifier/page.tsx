@@ -97,7 +97,7 @@ function EditServiceContent() {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#00CCC0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-[#50E3C2] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 font-MontserratRegular">
             Chargement des données...
           </p>
@@ -123,7 +123,7 @@ export default function EditMaintenanceServicePage() {
       fallback={
         <div className="w-full h-full flex items-center justify-center">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#00CCC0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-[#50E3C2] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600 font-MontserratRegular">
               Chargement...
             </p>
