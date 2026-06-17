@@ -4,10 +4,10 @@ import { authProvider } from "@/api/auth";
 import { AdminStorageKeys } from "@/api/admin";
 import { sidebar } from "@/data/navigation/sidebar";
 import { useModalStore } from "@/store/modal";
-import { Storage } from "@/api/auth/storage";
+import { Storage, StorageKeys } from "@/api/auth/storage";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
 import { useAuthStore } from "@/store/auth";
@@ -24,6 +24,7 @@ export default function Sidebar({
   onToggleCollapse,
 }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const { openModal } = useModalStore();
   const [logoutLoading, setLogoutLoading] = useState(false);
 
@@ -63,10 +64,24 @@ export default function Sidebar({
     Storage.removeItem(AdminStorageKeys.adminAccess);
     Storage.removeItem(AdminStorageKeys.adminId);
 
-    // Clear regular auth
-    const { data } = await authProvider.logout();
+    // Clear regular auth tokens
+    Storage.removeItem(StorageKeys.access);
+    Storage.removeItem(StorageKeys.refresh);
+    Storage.removeItem(StorageKeys.userId);
+
+    // Clear role preference
+    localStorage.removeItem("midaas_role");
+
+    // Clear auth store
+    useAuthStore.getState().loadUser(null as any);
+
+    // Call logout API
+    await authProvider.logout();
 
     setLogoutLoading(false);
+
+    // Redirect to login
+    window.location.href = "/auth/signin";
   };
 
   // Render menu item content

@@ -27,11 +27,9 @@ import {
   UserCheck,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { adminProvider } from "@/api/admin";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { user } = useAuthStore();
   const {
     pendingCompanies,
@@ -59,15 +57,7 @@ export default function DashboardPage() {
     isEntrepreneur && entrepreneurStatus === "active";
 
   // ─── Investor redirect ───────────────────────────────────
-  const storedRole =
-    typeof window !== "undefined" ? localStorage.getItem("midaas_role") : null;
-  const isInvestor = storedRole === "investor" && !isEntrepreneur;
-
-  useEffect(() => {
-    if (isInvestor) {
-      router.replace("/admin/portfolio");
-    }
-  }, [isInvestor, router]);
+  // Removed — sidebar navigation handles role-based routing
 
   // Stats calculations
   const totalFundingRaised = campaigns.reduce(
