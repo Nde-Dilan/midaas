@@ -1192,10 +1192,11 @@ paths:
 
   /projects/{id}/invest:
     post:
-      summary: Investir dans un projet
+      summary: Investir dans un projet via PawaPay (MMO)
       description: |
-        Confirme immediatement. Un email est envoye avec le dossier complet:
-        ROI, break-even, risques, analyse de marche, avantage concurrentiel.
+        Initie un depot PawaPay. Le statut PawaPay est retourne dans `pawapay_status`.
+        Fee plateforme 5% ajoutee au montant investi. Un email est envoye avec le
+        dossier complet: ROI, break-even, risques, analyse de marche.
       tags: [investments]
       security:
         - bearerAuth: []
@@ -1210,15 +1211,71 @@ paths:
           application/json:
             schema:
               type: object
-              required: [amount]
+              required: [amount, phone_number]
               properties:
                 amount:
                   type: number
+                  example: 200000
                 currency:
                   type: string
+                  example: XOF
+                phone_number:
+                  type: string
+                  description: Numero MSISDN (sans +, sans espaces)
+                  example: "237695000000"
+                provider:
+                  type: string
+                  description: Code MMO (ex. MTN_MOMO_CMR, ORANGE_CMR)
+                  example: MTN_MOMO_CMR
       responses:
         "201":
-          description: Investissement enregistre
+          description: Investissement enregistre + depot PawaPay initie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  invested_amount: 200000
+                  platform_fee_pct: 5
+                  platform_fee_amt: 10000
+                  total_charge: 210000
+                  remaining: 300000
+                  funding_progress: "40.0%"
+                  deposit_id: "638ae5e5-b9a1-..."
+                  pawapay_status: "ACCEPTED"
+                  provider: "MTN_MOMO_CMR"
+
+  /portfolio:
+    get:
+      summary: Portfolio de l'utilisateur
+      description: Valeur totale + liste des investissements avec projet, company, ownership.
+      tags: [investments]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Portfolio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              example:
+                success: true
+                data:
+                  total_value: 350000
+                  currency: XOF
+                  investments:
+                    - investment_id: "ddcc759c-..."
+                      project_id: "b825f55f-..."
+                      project_title: "Ferme Bio Midaas"
+                      company_name: "FredTech SARL"
+                      project_created: "2026-06-16"
+                      amount: 200000
+                      currency: XOF
+                      ownership_pct: 40.0
+                      project_status: "active"
 
   /projects/{id}/investors:
     get:
