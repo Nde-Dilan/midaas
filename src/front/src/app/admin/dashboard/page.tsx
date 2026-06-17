@@ -25,12 +25,13 @@ import {
   Shield,
   Clock,
   UserCheck,
-  ShieldAlert,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { adminProvider } from "@/api/admin";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const {
     pendingCompanies,
@@ -56,6 +57,17 @@ export default function DashboardPage() {
   const isPendingEntrepreneur = entrepreneurStatus === "pending";
   const isActiveEntrepreneur =
     isEntrepreneur && entrepreneurStatus === "active";
+
+  // ─── Investor redirect ───────────────────────────────────
+  const storedRole =
+    typeof window !== "undefined" ? localStorage.getItem("midaas_role") : null;
+  const isInvestor = storedRole === "investor" && !isEntrepreneur;
+
+  useEffect(() => {
+    if (isInvestor) {
+      router.replace("/admin/portfolio");
+    }
+  }, [isInvestor, router]);
 
   // Stats calculations
   const totalFundingRaised = campaigns.reduce(
@@ -340,12 +352,12 @@ export default function DashboardPage() {
               <Briefcase className="w-8 h-8 text-amber-600" />
             </div>
             <h2 className="text-2xl font-MontserratBold text-gray-900 mb-2">
-              Demande en cours de validation
+              Application Under Review
             </h2>
             <p className="text-gray-600 max-w-lg mx-auto">
-              Votre demande de passage en mode entrepreneur a été soumise avec
-              succès. Un administrateur va vérifier vos informations sous peu.
-              Vous recevrez une notification dès que votre statut sera actif.
+              Your entrepreneur application has been submitted successfully. An
+              administrator will review your information shortly. You will
+              receive a notification once your status is active.
             </p>
           </div>
         </div>
@@ -360,14 +372,14 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-MontserratBold text-gray-900">
-              Tableau de bord
+              Dashboard
             </h1>
             <p className="text-gray-500 text-sm mt-1">
               {isAdmin
                 ? "Midaas Platform Administration"
                 : isActiveEntrepreneur
-                  ? "Gérez vos entreprises et campagnes de financement"
-                  : "Explorez les opportunités d'investissement"}
+                  ? "Manage your companies and funding campaigns"
+                  : "Explore investment opportunities"}
             </p>
           </div>
           {isActiveEntrepreneur && (
@@ -378,11 +390,11 @@ export default function DashboardPage() {
                 className="gap-2"
               >
                 <Building2 className="w-4 h-4" />
-                Nouvelle entreprise
+                New Company
               </Button>
               <Button onClick={handleAddCampaign} className="gap-2">
                 <Plus className="w-4 h-4" />
-                Nouvelle campagne
+                New Campaign
               </Button>
             </div>
           )}
@@ -398,7 +410,7 @@ export default function DashboardPage() {
               {/* Entrepreneur Stats */}
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Mes entreprises</p>
+                  <p className="text-sm text-gray-500">My Companies</p>
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Building2 className="w-4 h-4 text-primary" />
                   </div>
@@ -408,7 +420,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Mes campagnes</p>
+                  <p className="text-sm text-gray-500">My Campaigns</p>
                   <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                     <Layers className="w-4 h-4 text-blue-600" />
                   </div>
@@ -418,7 +430,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Campagnes actives</p>
+                  <p className="text-sm text-gray-500">Active Campaigns</p>
                   <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                     <TrendingUp className="w-4 h-4 text-emerald-600" />
                   </div>
@@ -428,7 +440,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Total collecté</p>
+                  <p className="text-sm text-gray-500">Total Raised</p>
                   <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                     <Target className="w-4 h-4 text-amber-600" />
                   </div>
@@ -444,7 +456,7 @@ export default function DashboardPage() {
               {/* Investor Stats */}
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Projets disponibles</p>
+                  <p className="text-sm text-gray-500">Available Projects</p>
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Layers className="w-4 h-4 text-primary" />
                   </div>
@@ -454,7 +466,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Montant total levé</p>
+                  <p className="text-sm text-gray-500">Total Raised</p>
                   <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                     <TrendingUp className="w-4 h-4 text-blue-600" />
                   </div>
@@ -467,7 +479,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Projets actifs</p>
+                  <p className="text-sm text-gray-500">Active Projects</p>
                   <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                     <Target className="w-4 h-4 text-emerald-600" />
                   </div>
@@ -477,7 +489,7 @@ export default function DashboardPage() {
 
               <div className="bg-white rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-500">Investisseurs</p>
+                  <p className="text-sm text-gray-500">Investors</p>
                   <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                     <Users className="w-4 h-4 text-amber-600" />
                   </div>
@@ -494,15 +506,15 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between p-5 border-b border-border">
               <div>
                 <h3 className="text-lg font-MontserratBold text-gray-900">
-                  Mes entreprises
+                  My Companies
                 </h3>
                 <p className="text-sm text-gray-500 mt-0.5">
-                  Gérez les entreprises liées à vos campagnes
+                  Manage companies linked to your campaigns
                 </p>
               </div>
               <Button onClick={handleAddCompany} size="sm" className="gap-2">
                 <Plus className="w-4 h-4" />
-                Ajouter
+                Add
               </Button>
             </div>
 
@@ -523,7 +535,7 @@ export default function DashboardPage() {
                         </p>
                         <p className="text-xs text-gray-500">
                           {company.corporateForm} ·{" "}
-                          {company.industrySector || "Non spécifié"}
+                          {company.industrySector || "Not specified"}
                         </p>
                       </div>
                     </div>
@@ -546,16 +558,13 @@ export default function DashboardPage() {
               <div className="text-center py-12">
                 <div className="flex flex-col items-center gap-3">
                   <Building2 className="w-12 h-12 text-gray-300" />
-                  <p className="text-gray-500 font-medium">
-                    Aucune entreprise créée
-                  </p>
+                  <p className="text-gray-500 font-medium">No companies yet</p>
                   <p className="text-gray-400 text-sm">
-                    Créez votre première entreprise pour commencer à lancer des
-                    campagnes
+                    Create your first company to start launching campaigns
                   </p>
                   <Button onClick={handleAddCompany} className="mt-2 gap-2">
                     <Plus className="w-4 h-4" />
-                    Créer une entreprise
+                    Create Company
                   </Button>
                 </div>
               </div>
@@ -569,13 +578,13 @@ export default function DashboardPage() {
             <div>
               <h3 className="text-lg font-MontserratBold text-gray-900">
                 {isActiveEntrepreneur
-                  ? "Mes campagnes récentes"
-                  : "Campagnes récentes"}
+                  ? "My Recent Campaigns"
+                  : "Recent Campaigns"}
               </h3>
               <p className="text-sm text-gray-500 mt-0.5">
                 {isActiveEntrepreneur
-                  ? "Aperçu de vos dernières campagnes"
-                  : "Découvrez les dernières opportunités"}
+                  ? "Overview of your latest campaigns"
+                  : "Discover the latest opportunities"}
               </p>
             </div>
             <Link
@@ -614,7 +623,7 @@ export default function DashboardPage() {
                         {campaign.title}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {campaign.category || "Non catégorisé"} ·{" "}
+                        {campaign.category || "Uncategorized"} ·{" "}
                         {campaign.fundingGoal.toLocaleString()}{" "}
                         {campaign.currency}
                       </p>
@@ -663,18 +672,18 @@ export default function DashboardPage() {
                 <Search className="w-12 h-12 text-gray-300" />
                 <p className="text-gray-500 font-medium">
                   {isActiveEntrepreneur
-                    ? "Aucune campagne créée"
-                    : "Aucune campagne disponible"}
+                    ? "No campaigns created yet"
+                    : "No campaigns available"}
                 </p>
                 <p className="text-gray-400 text-sm">
                   {isActiveEntrepreneur
-                    ? "Créez votre première campagne après avoir enregistré une entreprise"
-                    : "Revenez plus tard pour découvrir les nouveaux projets"}
+                    ? "Create your first campaign after registering a company"
+                    : "Check back later for new projects"}
                 </p>
                 {isActiveEntrepreneur && (
                   <Button onClick={handleAddCampaign} className="mt-2 gap-2">
                     <Plus className="w-4 h-4" />
-                    Nouvelle campagne
+                    New Campaign
                   </Button>
                 )}
               </div>
@@ -690,16 +699,16 @@ export default function DashboardPage() {
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div>
                   <h3 className="text-xl font-MontserratBold">
-                    Prêt à investir ?
+                    Ready to Invest?
                   </h3>
                   <p className="text-white/80 mt-1 max-w-lg text-sm">
-                    Explorez les projets disponibles et trouvez celui qui
-                    correspond à vos objectifs d&apos;investissement.
+                    Explore available projects and find the one that matches
+                    your investment goals.
                   </p>
                 </div>
                 <Link href="/admin/projects">
                   <Button className="bg-white text-[#5E0E08] hover:bg-gray-100 gap-2 min-w-[180px]">
-                    Explorer les projets
+                    Explore Projects
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>

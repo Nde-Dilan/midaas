@@ -23,14 +23,15 @@ export default function OnboardingBanner({ onDismiss }: Props) {
   const [loading, setLoading] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  // Don't show if user already made a choice
-  // For entrepreneurs: don't show if already applied or active
-  // For investors: always show initially until they pick a role
+  // Don't show if user already made a choice (via API or localStorage)
+  const storedRole =
+    typeof window !== "undefined" ? localStorage.getItem("midaas_role") : null;
   if (
     !user ||
     dismissed ||
     user.isEntrepreneur ||
-    user.entrepreneurStatus === "pending"
+    user.entrepreneurStatus === "pending" ||
+    storedRole
   ) {
     return null;
   }
@@ -41,7 +42,8 @@ export default function OnboardingBanner({ onDismiss }: Props) {
     const { data, error } = await authProvider.becomeEntrepreneur();
 
     if (data) {
-      toast.success("Demande envoyée ! En attente de validation.");
+      localStorage.setItem("midaas_role", "entrepreneur");
+      toast.success("Application submitted! Awaiting approval.");
       // Refresh user to get updated profile with entrepreneur status
       const { data: refreshed } = await authProvider.refreshUser();
 
@@ -51,7 +53,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
 
       setDismissed(true);
     } else {
-      toast.error(error || "Une erreur est survenue");
+      toast.error(error || "An error occurred");
     }
 
     setLoading(false);
@@ -87,12 +89,11 @@ export default function OnboardingBanner({ onDismiss }: Props) {
           {/* Text */}
           <div className="flex-1">
             <h3 className="text-xl font-MontserratBold text-gray-900">
-              Bienvenue sur Midaas !
+              Welcome to Midaas!
             </h3>
             <p className="text-gray-600 mt-1 max-w-2xl text-sm leading-relaxed">
-              Découvrez comment vous souhaitez participer à notre plateforme de
-              financement participatif. Vous pouvez changer d&apos;avis à tout
-              moment.
+              Choose how you&apos;d like to participate in our crowdfunding
+              platform. You can change your mind at any time.
             </p>
           </div>
 
@@ -108,7 +109,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
               ) : (
                 <>
                   <Briefcase className="w-4 h-4" />
-                  Je suis entrepreneur
+                  I&apos;m an Entrepreneur
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -120,7 +121,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
               className="gap-2 border-[#5E0E08]/20 text-[#5E0E08] hover:bg-[#5E0E08]/5 min-w-[200px]"
             >
               <TrendingUp className="w-4 h-4" />
-              Je suis investisseur
+              I&apos;m an Investor
             </Button>
           </div>
         </div>
@@ -136,7 +137,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
                 Entrepreneur
               </p>
               <p className="text-xs text-gray-500">
-                Créez des campagnes et trouvez des financements
+                Create campaigns and secure funding
               </p>
             </div>
           </div>
@@ -146,11 +147,9 @@ export default function OnboardingBanner({ onDismiss }: Props) {
               <TrendingUp className="w-4 h-4 text-[#00de00]" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-900">
-                Investisseur
-              </p>
+              <p className="text-sm font-semibold text-gray-900">Investor</p>
               <p className="text-xs text-gray-500">
-                Explorez et investissez dans des projets prometteurs
+                Explore and invest in promising projects
               </p>
             </div>
           </div>
@@ -161,10 +160,10 @@ export default function OnboardingBanner({ onDismiss }: Props) {
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900">
-                Simple & Sécurisé
+                Simple & Secure
               </p>
               <p className="text-xs text-gray-500">
-                Suivez vos investissements en temps réel
+                Track your investments in real time
               </p>
             </div>
           </div>
