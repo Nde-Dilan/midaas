@@ -55,7 +55,7 @@ export default function ServicesPanel({
         {onAddService && (
           <button
             onClick={onAddService}
-            className="px-4 py-2 bg-[#00de00] text-white text-xs font-medium rounded-lg hover:bg-[#4a0f0a] transition-colors uppercase"
+            className="px-4 py-2 bg-[#00CCC0] text-white text-xs font-medium rounded-lg hover:bg-[#4a0f0a] transition-colors uppercase"
           >
             Ajouter un service
           </button>
@@ -71,14 +71,14 @@ export default function ServicesPanel({
           services.map((service) => (
             <div
               key={service.id}
-              className="border border-gray-200 rounded-lg p-4 hover:border-[#00de00] transition-colors"
+              className="border border-gray-200 rounded-lg p-4 hover:border-[#00CCC0] transition-colors"
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <h3 className="font-MontserratBold text-sm text-gray-900 mb-1">
                     {service.name}
                   </h3>
-                  <p className="text-[#00de00] font-MontserratBold text-base">
+                  <p className="text-[#00CCC0] font-MontserratBold text-base">
                     {service.price}
                   </p>
                 </div>
@@ -136,7 +136,7 @@ export default function ServicesPanel({
                           height="12"
                           viewBox="0 0 24 24"
                           fill="none"
-                          className="text-[#00de00]"
+                          className="text-[#00CCC0]"
                         >
                           <circle cx="12" cy="12" r="10" fill="currentColor" />
                         </svg>

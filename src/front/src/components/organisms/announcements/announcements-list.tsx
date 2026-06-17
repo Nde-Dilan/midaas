@@ -125,7 +125,7 @@ export default function AnnouncementsList({
                 {onReadMore && (
                   <button
                     onClick={() => onReadMore(announcement)}
-                    className="text-sm text-[#00de00] hover:underline font-medium"
+                    className="text-sm text-[#00CCC0] hover:underline font-medium"
                   >
                     Voir plus
                   </button>

@@ -133,7 +133,7 @@ export default function ValidatedProjectsPage() {
             onClick={() => setViewMode("grid")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "grid"
-                ? "text-[#e9b807]"
+                ? "text-[#00CCC0]"
                 : "text-black hover:bg-slate-100"
             }`}
             title="Grid Layout"
@@ -156,7 +156,7 @@ export default function ValidatedProjectsPage() {
             onClick={() => setViewMode("list")}
             className={`p-2 rounded-md transition-colors ${
               viewMode === "list"
-                ? "text-[#e9b807]"
+                ? "text-[#00CCC0]"
                 : "text-black hover:bg-slate-100"
             }`}
             title="List Layout"

@@ -137,7 +137,7 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="p-6 min-h-screen flex items-center justify-center">
-        <Loader className="w-8 h-8 animate-spin text-[#00de00]" />
+        <Loader className="w-8 h-8 animate-spin text-[#00CCC0]" />
       </div>
     );
   }
@@ -152,7 +152,7 @@ export default function ProjectDetailPage() {
           </p>
           <button
             onClick={() => router.push(backLink)}
-            className="mt-4 text-sm text-[#00de00] hover:underline font-MontserratSemiBold"
+            className="mt-4 text-sm text-[#00CCC0] hover:underline font-MontserratSemiBold"
           >
             {isEntrepreneur ? "Back to My Campaigns" : "Back to projects"}
           </button>
@@ -182,7 +182,7 @@ export default function ProjectDetailPage() {
       <div className="bg-white border border-border rounded-2xl p-6 shadow-sm mb-6">
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Cover image */}
-          <div className="w-full lg:w-1/3 aspect-[4/3] bg-gradient-to-br from-[#00de00]/5 to-[#00de00]/20 rounded-xl relative flex items-center justify-center overflow-hidden border border-slate-100">
+          <div className="w-full lg:w-1/3 aspect-[4/3] bg-gradient-to-br from-[#00CCC0]/5 to-[#00CCC0]/20 rounded-xl relative flex items-center justify-center overflow-hidden border border-slate-100">
             {project.coverImageUrl ? (
               <img
                 src={project.coverImageUrl}
@@ -273,7 +273,7 @@ export default function ProjectDetailPage() {
               <Button
                 onClick={handleInvest}
                 disabled={!canInvest}
-                className="bg-[#00de00] hover:bg-[#00c800] text-white px-8 py-6 text-base font-MontserratSemiBold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+                className="bg-[#00CCC0] hover:bg-[#00c800] text-white px-8 py-6 text-base font-MontserratSemiBold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {canInvest
                   ? "Invest Now"
@@ -399,7 +399,7 @@ export default function ProjectDetailPage() {
               onClick={() => setActiveTab(key)}
               className={`pb-3 text-sm font-medium tracking-wider border-b-2 transition-all whitespace-nowrap ${
                 activeTab === key
-                  ? "border-[#00de00] text-foreground font-MontserratSemiBold"
+                  ? "border-[#00CCC0] text-foreground font-MontserratSemiBold"
                   : "border-transparent text-muted-foreground hover:text-gray-700"
               }`}
             >
@@ -736,7 +736,7 @@ export default function ProjectDetailPage() {
 
                         {/* Name */}
                         <div className="col-span-4 flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-[#00de00]/10 flex items-center justify-center text-[10px] font-MontserratSemiBold text-[#00de00] shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-[#00CCC0]/10 flex items-center justify-center text-[10px] font-MontserratSemiBold text-[#00CCC0] shrink-0">
                             {(investor.full_name ?? "A")
                               .split(" ")
                               .map((n) => n[0])
@@ -776,7 +776,7 @@ export default function ProjectDetailPage() {
                         {/* Ownership */}
                         <div className="col-span-3 text-right">
                           {investor.ownership_pct != null ? (
-                            <span className="inline-block px-2 py-0.5 text-[11px] font-MontserratSemiBold bg-[#00de00]/10 text-[#00de00] rounded-full">
+                            <span className="inline-block px-2 py-0.5 text-[11px] font-MontserratSemiBold bg-[#00CCC0]/10 text-[#00CCC0] rounded-full">
                               {investor.ownership_pct.toFixed(2)}%
                             </span>
                           ) : (
@@ -805,7 +805,7 @@ export default function ProjectDetailPage() {
         <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-white border-t border-border p-4 shadow-lg z-40">
           <Button
             onClick={handleInvest}
-            className="w-full bg-[#00de00] hover:bg-[#00c800] text-white py-6 text-base font-MontserratSemiBold rounded-xl"
+            className="w-full bg-[#00CCC0] hover:bg-[#00c800] text-white py-6 text-base font-MontserratSemiBold rounded-xl"
           >
             Invest in {project.title}
           </Button>

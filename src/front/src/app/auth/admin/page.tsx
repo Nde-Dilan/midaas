@@ -73,7 +73,7 @@ export default function AdminSignin() {
   return (
     <main className="min-h-screen bg-gray-950">
       {/* Top Accent */}
-      <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-[#00de00] to-emerald-400" />
+      <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-[#00CCC0] to-emerald-400" />
 
       <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">

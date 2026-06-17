@@ -76,7 +76,7 @@ export default function Layout({ children }: Props) {
   return (
     <section className="bg-gray-50 w-screen h-screen flex overflow-hidden relative">
       {/* Maroon background strip at top */}
-      <div className="fixed top-0 left-0 right-0 h-32 bg-[#00de00] z-10" />
+      <div className="fixed top-0 left-0 right-0 h-32 bg-[#00CCC0] z-10" />
 
       {/* Navbar */}
       <div className="fixed top-0 left-0 right-0 z-30">

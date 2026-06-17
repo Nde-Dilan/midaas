@@ -69,8 +69,8 @@ export default function OnboardingBanner({ onDismiss }: Props) {
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#5E0E08] via-[#7A1A12] to-[#5E0E08] p-[2px]">
       <div className="relative bg-white rounded-2xl p-6">
         {/* Background decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#00de00]/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#00de00]/5 to-transparent rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#00CCC0]/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-[#00CCC0]/5 to-transparent rounded-full translate-y-1/2 -translate-x-1/2" />
 
         {/* Close button */}
         <button
@@ -82,7 +82,7 @@ export default function OnboardingBanner({ onDismiss }: Props) {
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
           {/* Icon */}
-          <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00de00] to-[#E0B004] flex items-center justify-center shadow-lg">
+          <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-[#00CCC0] to-[#E0B004] flex items-center justify-center shadow-lg">
             <Sparkles className="w-8 h-8 text-[#5E0E08]" />
           </div>
 
@@ -129,8 +129,8 @@ export default function OnboardingBanner({ onDismiss }: Props) {
         {/* Feature highlights */}
         <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-6 pt-6 border-t border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#00de00]/10 flex items-center justify-center flex-shrink-0">
-              <Briefcase className="w-4 h-4 text-[#00de00]" />
+            <div className="w-8 h-8 rounded-lg bg-[#00CCC0]/10 flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-4 h-4 text-[#00CCC0]" />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900">
@@ -143,8 +143,8 @@ export default function OnboardingBanner({ onDismiss }: Props) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#00de00]/10 flex items-center justify-center flex-shrink-0">
-              <TrendingUp className="w-4 h-4 text-[#00de00]" />
+            <div className="w-8 h-8 rounded-lg bg-[#00CCC0]/10 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-4 h-4 text-[#00CCC0]" />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900">Investor</p>
@@ -155,8 +155,8 @@ export default function OnboardingBanner({ onDismiss }: Props) {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#00de00]/10 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-4 h-4 text-[#00de00]" />
+            <div className="w-8 h-8 rounded-lg bg-[#00CCC0]/10 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-[#00CCC0]" />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900">

@@ -18,7 +18,7 @@ export default function StatisticCard({
   return (
     <article
       className={`min-w-[220px] rounded-3xl px-6 py-6 flex flex-col items-start justify-start gap-3 transition-shadow ${
-        isMaroon ? "bg-[#00de00] text-white shadow-sm" : "bg-white"
+        isMaroon ? "bg-[#00CCC0] text-white shadow-sm" : "bg-white"
       }`}
     >
       <div className="flex items-center justify-center [&_svg]:w-12 [&_svg]:h-12 [&_svg]:text-[#D4A574]">

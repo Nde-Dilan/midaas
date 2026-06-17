@@ -94,19 +94,19 @@ export default function ExplorePage() {
             <nav className="hidden md:flex items-center gap-8">
               <Link
                 href="/#features"
-                className="text-sm text-gray-600 hover:text-[#00de00] transition-colors font-MontserratRegular"
+                className="text-sm text-gray-600 hover:text-[#00CCC0] transition-colors font-MontserratRegular"
               >
                 Features
               </Link>
               <Link
                 href="/#how-it-works"
-                className="text-sm text-gray-600 hover:text-[#00de00] transition-colors font-MontserratRegular"
+                className="text-sm text-gray-600 hover:text-[#00CCC0] transition-colors font-MontserratRegular"
               >
                 How It Works
               </Link>
               <Link
                 href="/explore"
-                className="text-sm text-[#00de00] font-MontserratSemiBold"
+                className="text-sm text-[#00CCC0] font-MontserratSemiBold"
               >
                 Explore Projects
               </Link>
@@ -115,13 +115,13 @@ export default function ExplorePage() {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 href="/auth/signin"
-                className="px-5 py-2 text-sm font-MontserratSemiBold text-gray-700 hover:text-[#00de00] transition-colors"
+                className="px-5 py-2 text-sm font-MontserratSemiBold text-gray-700 hover:text-[#00CCC0] transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#00de00] rounded-full hover:bg-[#00c800] transition-colors shadow-sm"
+                className="px-5 py-2.5 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full hover:bg-[#00c800] transition-colors shadow-sm"
               >
                 Get Started
               </Link>
@@ -192,7 +192,7 @@ export default function ExplorePage() {
             <Link
               href="/auth/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-center text-sm font-MontserratSemiBold text-white bg-[#00de00] rounded-full py-2.5"
+              className="block text-center text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full py-2.5"
             >
               Get Started
             </Link>
@@ -204,7 +204,7 @@ export default function ExplorePage() {
       <section className="pt-32 pb-12 md:pt-40 md:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-MontserratBold text-gray-900 tracking-tight">
-            Explore <span className="text-[#00de00]">Approved Projects</span>
+            Explore <span className="text-[#00CCC0]">Approved Projects</span>
           </h1>
           <p className="mt-4 text-gray-500 max-w-2xl mx-auto leading-relaxed">
             Browse verified businesses and initiatives looking for capital. No
@@ -238,7 +238,7 @@ export default function ExplorePage() {
               placeholder="Search by name, industry…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all"
+              className="w-full pl-11 pr-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-[#00CCC0] focus:ring-2 focus:ring-[#00CCC0]/10 outline-none transition-all"
             />
           </div>
 
@@ -254,8 +254,8 @@ export default function ExplorePage() {
                   className={twMerge(
                     "px-3.5 py-1.5 text-xs rounded-full border transition-colors font-MontserratSemiBold",
                     sectorFilter === s
-                      ? "bg-[#00de00] text-white border-[#00de00]"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-[#00de00] hover:text-[#00de00]",
+                      ? "bg-[#00CCC0] text-white border-[#00CCC0]"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-[#00CCC0] hover:text-[#00CCC0]",
                   )}
                 >
                   {s}
@@ -328,7 +328,7 @@ export default function ExplorePage() {
                       className={twMerge(
                         "px-3 py-1.5 text-xs rounded-full border transition-colors",
                         sectorFilter === s
-                          ? "bg-[#00de00] text-white border-[#00de00]"
+                          ? "bg-[#00CCC0] text-white border-[#00CCC0]"
                           : "bg-white text-gray-600 border-gray-200",
                       )}
                     >
@@ -390,7 +390,7 @@ export default function ExplorePage() {
                   setSectorFilter("All");
                   setFormFilter("All");
                 }}
-                className="mt-3 text-xs text-[#00de00] hover:underline"
+                className="mt-3 text-xs text-[#00CCC0] hover:underline"
               >
                 Reset filters
               </button>
@@ -437,7 +437,7 @@ export default function ExplorePage() {
                       return (
                         <div
                           key={project.id}
-                          className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#00de00]/20 transition-all duration-300 p-6 flex flex-col"
+                          className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#00CCC0]/20 transition-all duration-300 p-6 flex flex-col"
                         >
                           {/* Project title */}
                           <div className="flex items-start justify-between mb-3">
@@ -560,7 +560,7 @@ export default function ExplorePage() {
                           {/* CTA */}
                           <Link
                             href="/auth/signup"
-                            className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-MontserratSemiBold text-white bg-[#00de00] rounded-xl hover:bg-[#00c800] transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-MontserratSemiBold text-white bg-[#00CCC0] rounded-xl hover:bg-[#00c800] transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                           >
                             Sign Up to Invest
                             <svg
@@ -600,13 +600,13 @@ export default function ExplorePage() {
           <div className="mt-6 flex items-center justify-center gap-4">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-2 px-8 py-3 text-sm font-MontserratSemiBold text-white bg-[#00de00] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#00de00]/25"
+              className="inline-flex items-center gap-2 px-8 py-3 text-sm font-MontserratSemiBold text-white bg-[#00CCC0] rounded-full hover:bg-[#00c800] transition-colors shadow-lg shadow-[#00CCC0]/25"
             >
               Create Free Account
             </Link>
             <Link
               href="/auth/signin"
-              className="inline-flex items-center gap-2 px-8 py-3 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#00de00] hover:text-[#00de00] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3 text-sm font-MontserratSemiBold text-gray-700 border border-gray-200 rounded-full hover:border-[#00CCC0] hover:text-[#00CCC0] transition-colors"
             >
               Sign In
             </Link>
@@ -633,19 +633,19 @@ export default function ExplorePage() {
             <div className="flex items-center gap-6">
               <Link
                 href="/"
-                className="text-xs text-gray-400 hover:text-[#00de00] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
               >
                 Home
               </Link>
               <Link
                 href="/auth/signin"
-                className="text-xs text-gray-400 hover:text-[#00de00] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/auth/signup"
-                className="text-xs text-gray-400 hover:text-[#00de00] transition-colors"
+                className="text-xs text-gray-400 hover:text-[#00CCC0] transition-colors"
               >
                 Sign Up
               </Link>

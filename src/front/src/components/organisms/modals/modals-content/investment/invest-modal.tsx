@@ -133,13 +133,13 @@ export default function InvestModal() {
         <div className="space-y-5">
           {/* Header */}
           <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#00de00]/10 flex items-center justify-center">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#00CCC0]/10 flex items-center justify-center">
               <svg
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#00de00"
+                stroke="#00CCC0"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -169,8 +169,8 @@ export default function InvestModal() {
                   onClick={() => setAmount(preset.toString())}
                   className={`px-3 py-2 text-xs font-MontserratSemiBold rounded-lg border transition-all ${
                     parseInt(amount) === preset
-                      ? "border-[#00de00] bg-[#00de00]/10 text-[#00de00]"
-                      : "border-gray-200 text-gray-600 hover:border-[#00de00] hover:text-[#00de00]"
+                      ? "border-[#00CCC0] bg-[#00CCC0]/10 text-[#00CCC0]"
+                      : "border-gray-200 text-gray-600 hover:border-[#00CCC0] hover:text-[#00CCC0]"
                   }`}
                 >
                   {preset.toLocaleString()}
@@ -188,7 +188,7 @@ export default function InvestModal() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Custom amount"
-                className="w-full pl-14 pr-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all"
+                className="w-full pl-14 pr-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00CCC0] focus:ring-2 focus:ring-[#00CCC0]/10 outline-none transition-all"
               />
             </div>
             {amount && (
@@ -205,7 +205,7 @@ export default function InvestModal() {
                     {currency} {totalCharge.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-[#00de00] font-medium">
+                <div className="flex justify-between text-[#00CCC0] font-medium">
                   <span>Remaining to goal</span>
                   <span>
                     {currency} {remaining.toLocaleString()}
@@ -228,7 +228,7 @@ export default function InvestModal() {
                   setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ""))
                 }
                 placeholder="+237690000000"
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all"
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00CCC0] focus:ring-2 focus:ring-[#00CCC0]/10 outline-none transition-all"
               />
               {detectedCountry && (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[11px] text-gray-400">
@@ -256,7 +256,7 @@ export default function InvestModal() {
               <select
                 value={provider}
                 onChange={(e) => setProvider(e.target.value)}
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00de00] focus:ring-2 focus:ring-[#00de00]/10 outline-none transition-all bg-white appearance-none"
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:border-[#00CCC0] focus:ring-2 focus:ring-[#00CCC0]/10 outline-none transition-all bg-white appearance-none"
               >
                 {availableProviders.map((p) => (
                   <option key={p.value} value={p.value}>
@@ -290,7 +290,7 @@ export default function InvestModal() {
             <Button
               onClick={handleInvest}
               disabled={!isValid}
-              className="flex-1 bg-[#00de00] hover:bg-[#00c800] text-white disabled:opacity-40"
+              className="flex-1 bg-[#00CCC0] hover:bg-[#00c800] text-white disabled:opacity-40"
             >
               Invest Now
             </Button>
@@ -301,7 +301,7 @@ export default function InvestModal() {
       {/* ─── CONFIRMING STEP ──────────────────────── */}
       {step === "confirming" && (
         <div className="py-10 text-center space-y-4">
-          <Loader className="w-10 h-10 animate-spin mx-auto text-[#00de00]" />
+          <Loader className="w-10 h-10 animate-spin mx-auto text-[#00CCC0]" />
           <p className="text-sm text-gray-600">Processing your investment...</p>
           <p className="text-xs text-gray-400">
             Please check your phone for a payment prompt.
@@ -341,7 +341,7 @@ export default function InvestModal() {
                 {currency} {result.total_charge?.toLocaleString()}
               </span>
             </div>
-            <div className="flex justify-between text-[#00de00]">
+            <div className="flex justify-between text-[#00CCC0]">
               <span>Funding progress</span>
               <span>{result.funding_progress}</span>
             </div>
@@ -365,7 +365,7 @@ export default function InvestModal() {
 
           <Button
             onClick={handleClose}
-            className="w-full bg-[#00de00] hover:bg-[#00c800] text-white"
+            className="w-full bg-[#00CCC0] hover:bg-[#00c800] text-white"
           >
             Done
           </Button>
@@ -388,7 +388,7 @@ export default function InvestModal() {
             </Button>
             <Button
               onClick={handleTryAgain}
-              className="flex-1 bg-[#00de00] hover:bg-[#00c800] text-white"
+              className="flex-1 bg-[#00CCC0] hover:bg-[#00c800] text-white"
             >
               Try Again
             </Button>

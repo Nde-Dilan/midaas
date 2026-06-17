@@ -119,7 +119,7 @@ export default function AdminPendingCompaniesPage() {
             placeholder="Search companies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00de00]/20 focus:border-[#00de00] transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00CCC0]/20 focus:border-[#00CCC0] transition-all"
           />
         </div>
 
@@ -288,7 +288,7 @@ export default function AdminPendingCompaniesPage() {
 
                       {/* CTA */}
                       <div className="col-span-2 hidden md:flex justify-end">
-                        <span className="inline-flex items-center gap-1 text-sm font-MontserratSemiBold text-[#00de00]">
+                        <span className="inline-flex items-center gap-1 text-sm font-MontserratSemiBold text-[#00CCC0]">
                           {isDone ? "View" : "Review"}
                           <ChevronRight className="w-4 h-4" />
                         </span>

@@ -95,7 +95,7 @@ export default function Sidebar({
         <span
           className={twMerge(
             "flex items-center justify-center w-10 h-10 rounded-lg transition-all shrink-0",
-            isActive ? "bg-[#00de00]" : "bg-transparent",
+            isActive ? "bg-[#00CCC0]" : "bg-transparent",
           )}
         >
           <span className="[&_svg_path]:transition-all">
@@ -113,7 +113,7 @@ export default function Sidebar({
             className={twMerge(
               "text-[15px] leading-[150%] transition-colors whitespace-nowrap",
               isActive
-                ? "font-MontserratBold text-[#00de00]"
+                ? "font-MontserratBold text-[#00CCC0]"
                 : "font-MontserratRegular text-gray-500",
             )}
           >
@@ -148,7 +148,7 @@ export default function Sidebar({
       </div>
 
       {/* Separator */}
-      <div className="mx-6 h-[2px] bg-gradient-to-r from-transparent via-[#00de00] to-transparent" />
+      <div className="mx-6 h-[2px] bg-gradient-to-r from-transparent via-[#00CCC0] to-transparent" />
 
       {/* Navigation Items */}
       <nav

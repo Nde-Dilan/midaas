@@ -355,7 +355,7 @@ export default function AdminCompanyReviewPage() {
                   <span
                     className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-MontserratBold transition-all ${
                       isActive
-                        ? "bg-[#00de00] text-white shadow-lg shadow-[#00de00]/20"
+                        ? "bg-[#00CCC0] text-white shadow-lg shadow-[#00CCC0]/20"
                         : isDone
                           ? "bg-emerald-100 text-emerald-700"
                           : "bg-gray-100 text-gray-400"
@@ -720,9 +720,7 @@ function StepDocuments({ company }: { company: AdminCompanyDetail }) {
       />
       <DocRow
         label="Documents de garantie (collatéral)"
-        urls={
-          (company as any).operations?.collateral_proof_docs
-        }
+        urls={(company as any).operations?.collateral_proof_docs}
       />
       <DocRow label="Pièces d'identité" urls={undefined} />
     </div>

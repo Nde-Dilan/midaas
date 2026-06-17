@@ -187,7 +187,7 @@ export default function AdminEntrepreneursPage() {
             placeholder="Search entrepreneurs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00de00]/20 focus:border-[#00de00] transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00CCC0]/20 focus:border-[#00CCC0] transition-all"
           />
         </div>
 

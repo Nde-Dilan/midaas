@@ -24,7 +24,7 @@ export default function AnnouncementsHeader({
       {onAddAnnouncement && (
         <button
           onClick={onAddAnnouncement}
-          className="px-6 py-3 bg-[#00de00] text-white text-sm font-medium rounded-lg hover:bg-[#4a0f0a] transition-colors flex items-center gap-2"
+          className="px-6 py-3 bg-[#00CCC0] text-white text-sm font-medium rounded-lg hover:bg-[#4a0f0a] transition-colors flex items-center gap-2"
         >
           <svg
             width="16"

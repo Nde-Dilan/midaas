@@ -181,14 +181,14 @@ export default function AuthSignin() {
                 </label>
               </div>
               <Link href="/auth/forgot-password">
-                <span className="text-[#00de00] text-sm cursor-pointer hover:underline">
+                <span className="text-[#00CCC0] text-sm cursor-pointer hover:underline">
                   Forgot password?
                 </span>
               </Link>
             </div>
 
             <Button
-              className="w-full h-10 rounded-lg mt-6 bg-[#00de00] text-white hover:bg-[#50100d] font-semibold"
+              className="w-full h-10 rounded-lg mt-6 bg-[#00CCC0] text-white hover:bg-[#50100d] font-semibold"
               type="submit"
               disabled={loading}
             >
@@ -198,7 +198,7 @@ export default function AuthSignin() {
 
           <div className="mt-4 text-center">
             <Link href="/auth/signup">
-              <Button className="w-full h-10 rounded-lg mt-2 text-[#00de00] bg-transparent hover:bg-transparent shadow-none font-medium">
+              <Button className="w-full h-10 rounded-lg mt-2 text-[#00CCC0] bg-transparent hover:bg-transparent shadow-none font-medium">
                 Create an account
               </Button>
             </Link>

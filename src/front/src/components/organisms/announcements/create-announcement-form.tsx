@@ -51,7 +51,7 @@ export default function CreateAnnouncementForm({
             value={formData.title}
             onChange={(e) => handleChange("title", e.target.value)}
             placeholder="Entrez le titre de l'annonce"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00de00] focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00CCC0] focus:border-transparent"
             disabled={isLoading}
           />
         </div>
@@ -63,7 +63,7 @@ export default function CreateAnnouncementForm({
             onChange={(e) => handleChange("texte", e.target.value)}
             placeholder="Entrez le texte de l'annonce"
             rows={6}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00de00] focus:border-transparent resize-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00CCC0] focus:border-transparent resize-none"
             disabled={isLoading}
           />
         </div>
