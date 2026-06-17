@@ -27,9 +27,11 @@ import {
   UserCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { adminProvider } from "@/api/admin";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const {
     pendingCompanies,
@@ -98,7 +100,7 @@ export default function DashboardPage() {
   };
 
   const handleAddCampaign = () => {
-    openModal({ name: ModalNames.ADD_CAMPAIGN });
+    router.push("/admin/my-campaigns/new");
   };
 
   // ─── Admin Dashboard ───────────────────────────────────────────
