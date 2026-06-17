@@ -2,10 +2,12 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/MiltonJ23/Midaas/internal/adapters/pawapay"
 	"github.com/MiltonJ23/Midaas/internal/contracts"
 	"github.com/MiltonJ23/Midaas/internal/domain"
 	"github.com/MiltonJ23/Midaas/internal/logger"
@@ -13,23 +15,34 @@ import (
 )
 
 type InvestmentHandler struct {
-	investmentRepo contracts.InvestmentRepository
-	projectRepo    contracts.ProjectRepository
-	userRepo       contracts.UserRepository
-	notifSvc       contracts.NotificationService
+	investmentRepo  contracts.InvestmentRepository
+	projectRepo     contracts.ProjectRepository
+	userRepo        contracts.UserRepository
+	companyRepo     contracts.CompanyRepository
+	transactionRepo contracts.TransactionRepository
+	notifSvc        contracts.NotificationService
+	pawaPay         *pawapay.Client
+	platformFeePct  float64
 }
 
 func NewInvestmentHandler(
 	investmentRepo contracts.InvestmentRepository,
 	projectRepo contracts.ProjectRepository,
 	userRepo contracts.UserRepository,
+	companyRepo contracts.CompanyRepository,
+	transactionRepo contracts.TransactionRepository,
 	notifSvc contracts.NotificationService,
+	pawaPay *pawapay.Client,
 ) *InvestmentHandler {
 	return &InvestmentHandler{
-		investmentRepo: investmentRepo,
-		projectRepo:    projectRepo,
-		userRepo:       userRepo,
-		notifSvc:       notifSvc,
+		investmentRepo:  investmentRepo,
+		projectRepo:     projectRepo,
+		userRepo:        userRepo,
+		companyRepo:     companyRepo,
+		transactionRepo: transactionRepo,
+		notifSvc:        notifSvc,
+		pawaPay:         pawaPay,
+		platformFeePct:  5.0,
 	}
 }
 
@@ -49,8 +62,10 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input struct {
-		Amount   float64 `json:"amount"`
-		Currency string  `json:"currency"`
+		Amount      float64 `json:"amount"`
+		Currency    string  `json:"currency"`
+		PhoneNumber string  `json:"phone_number"`
+		Provider    string  `json:"provider"`
 	}
 	if err := Decode(r, &input); err != nil {
 		JSONError(w, http.StatusBadRequest, "invalid request body")
@@ -60,8 +75,9 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		JSONError(w, http.StatusBadRequest, "amount must be positive")
 		return
 	}
-	if input.Currency == "" {
-		input.Currency = "XOF"
+	if input.PhoneNumber == "" {
+		JSONError(w, http.StatusBadRequest, "phone_number is required for mobile money payment")
+		return
 	}
 
 	project, err := h.projectRepo.FindByID(ctx, projectID)
@@ -74,21 +90,103 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	remaining := project.FundingGoal - project.FundingRaised
+	if input.Amount > remaining {
+		JSONError(w, http.StatusBadRequest, fmt.Sprintf("amount exceeds remaining funding: %.2f %s", remaining, project.Currency))
+		return
+	}
+
+	currency := input.Currency
+	if currency == "" {
+		currency = project.Currency
+	}
+
+	feeAmt := input.Amount * h.platformFeePct / 100
+	totalCharge := input.Amount + feeAmt
 	ownershipPct := (input.Amount / project.FundingGoal) * 100
 
+	depositID := uuid.New().String()
+
 	investment := &domain.Investment{
-		ID:           uuid.New(),
-		ProjectID:    projectID,
-		UserID:       userID,
-		Amount:       input.Amount,
-		Currency:     input.Currency,
-		OwnershipPct: ownershipPct,
-		Status:       domain.InvestmentStatusConfirmed,
+		ID:             uuid.New(),
+		ProjectID:      projectID,
+		UserID:         userID,
+		Amount:         input.Amount,
+		Currency:       currency,
+		OwnershipPct:   ownershipPct,
+		PlatformFeePct: h.platformFeePct,
+		PlatformFeeAmt: feeAmt,
+		NetAmount:      input.Amount,
+		Status:         domain.InvestmentStatusConfirmed,
+		DepositID:      depositID,
 	}
 	if err := h.investmentRepo.Create(ctx, investment); err != nil {
 		logger.Error(ctx, "handler: create investment failed", slog.String("error", err.Error()))
 		JSONError(w, http.StatusInternalServerError, "failed to record investment")
 		return
+	}
+
+	pawaPayStatus := "not_configured"
+
+	if h.pawaPay != nil {
+		depReq := pawapay.DepositRequest{
+			DepositID: depositID,
+			Amount:    fmt.Sprintf("%.2f", totalCharge),
+			Currency:  currency,
+		}
+		depReq.Payer.Type = "MMO"
+		depReq.Payer.AccountDetails.PhoneNumber = input.PhoneNumber
+		depReq.Payer.AccountDetails.Provider = input.Provider
+		msg := project.Title
+		if len(msg) > 22 {
+			msg = msg[:22]
+		}
+		depReq.CustomerMessage = msg
+
+		resp, err := h.pawaPay.InitiateDeposit(context.Background(), depReq)
+		if err != nil {
+			logger.Error(ctx, "handler: pawapay deposit failed", slog.String("error", err.Error()))
+			pawaPayStatus = "error: " + err.Error()
+		} else {
+			pawaPayStatus = resp.Status
+			if resp.FailureReason != nil {
+				pawaPayStatus = resp.Status + " (" + resp.FailureReason.FailureCode + ")"
+			}
+		}
+	}
+
+	now := time.Now()
+
+	invTx := &domain.Transaction{
+		ID:           uuid.New(),
+		UserID:       userID,
+		InvestmentID: &investment.ID,
+		Type:         domain.TransactionTypeInvestment,
+		Amount:       totalCharge,
+		Currency:     currency,
+		Direction:    domain.TransactionDirectionDebit,
+		Status:       domain.TransactionStatusCompleted,
+		GatewayRef:   depositID,
+		Description:  fmt.Sprintf("Investment in %s (%.0f%% fee included) via %s", project.Title, h.platformFeePct, input.Provider),
+		CreatedAt:    now,
+	}
+	h.transactionRepo.Create(ctx, invTx)
+
+	if feeAmt > 0 {
+		feeTx := &domain.Transaction{
+			ID:           uuid.New(),
+			UserID:       userID,
+			InvestmentID: &investment.ID,
+			Type:         "platform_fee",
+			Amount:       feeAmt,
+			Currency:     currency,
+			Direction:    domain.TransactionDirectionDebit,
+			Status:       domain.TransactionStatusCompleted,
+			GatewayRef:   depositID,
+			Description:  fmt.Sprintf("Platform fee (%.0f%%) for %s", h.platformFeePct, project.Title),
+			CreatedAt:    now,
+		}
+		h.transactionRepo.Create(ctx, feeTx)
 	}
 
 	project.FundingRaised += input.Amount
@@ -100,14 +198,31 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 	h.projectRepo.Update(ctx, project)
 
 	if h.notifSvc != nil {
-		go h.notifSvc.SendInvestmentConfirmation(ctx, userID, project.ID)
+		uid := userID
+		pid := project.ID
+		go h.notifSvc.SendInvestmentConfirmation(context.Background(), uid, pid)
 	}
 
 	logger.Info(ctx, "handler: investment recorded",
 		slog.String("investment_id", investment.ID.String()),
-		slog.String("project_id", projectID.String()),
+		slog.Float64("amount", input.Amount),
+		slog.Float64("fee", feeAmt),
+		slog.Float64("total", totalCharge),
+		slog.String("deposit_id", depositID),
 	)
-	JSON(w, http.StatusCreated, investment)
+
+	JSON(w, http.StatusCreated, map[string]interface{}{
+		"investment":       investment,
+		"invested_amount":  input.Amount,
+		"platform_fee_pct": h.platformFeePct,
+		"platform_fee_amt": feeAmt,
+		"total_charge":     totalCharge,
+		"remaining":        project.FundingGoal - project.FundingRaised,
+		"funding_progress": fmt.Sprintf("%.1f%%", project.FundingRaised/project.FundingGoal*100),
+		"deposit_id":       depositID,
+		"pawapay_status":   pawaPayStatus,
+		"provider":         input.Provider,
+	})
 }
 
 func (h *InvestmentHandler) ListMyInvestments(w http.ResponseWriter, r *http.Request) {
@@ -139,13 +254,14 @@ func (h *InvestmentHandler) ListProjectInvestors(w http.ResponseWriter, r *http.
 	}
 
 	type investorInfo struct {
-		InvestmentID string  `json:"investment_id"`
-		UserID       string  `json:"user_id"`
-		FullName     string  `json:"full_name"`
-		Amount       float64 `json:"amount"`
-		Currency     string  `json:"currency"`
-		OwnershipPct float64 `json:"ownership_pct"`
-		InvestedAt   string  `json:"invested_at"`
+		InvestmentID   string  `json:"investment_id"`
+		UserID         string  `json:"user_id"`
+		FullName       string  `json:"full_name"`
+		Amount         float64 `json:"amount"`
+		Currency       string  `json:"currency"`
+		OwnershipPct   float64 `json:"ownership_pct"`
+		PlatformFeePct float64 `json:"platform_fee_pct"`
+		InvestedAt     string  `json:"invested_at"`
 	}
 
 	investors := make([]investorInfo, 0, len(investments))
@@ -156,16 +272,98 @@ func (h *InvestmentHandler) ListProjectInvestors(w http.ResponseWriter, r *http.
 			name = user.FullName
 		}
 		investors = append(investors, investorInfo{
-			InvestmentID: inv.ID.String(),
-			UserID:       inv.UserID.String(),
-			FullName:     name,
-			Amount:       inv.Amount,
-			Currency:     inv.Currency,
-			OwnershipPct: inv.OwnershipPct,
-			InvestedAt:   inv.CreatedAt.Format("2006-01-02T15:04:05Z"),
+			InvestmentID:   inv.ID.String(),
+			UserID:         inv.UserID.String(),
+			FullName:       name,
+			Amount:         inv.Amount,
+			Currency:       inv.Currency,
+			OwnershipPct:   inv.OwnershipPct,
+			PlatformFeePct: inv.PlatformFeePct,
+			InvestedAt:     inv.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		})
 	}
 	JSON(w, http.StatusOK, investors)
+}
+
+func (h *InvestmentHandler) MyTransactions(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID, err := uuid.Parse(userIDFromContext_str(ctx))
+	if err != nil {
+		JSONError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	txns, _, err := h.transactionRepo.ListByUser(ctx, userID, 1, 100)
+	if err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to list transactions")
+		return
+	}
+	JSON(w, http.StatusOK, txns)
+}
+
+func (h *InvestmentHandler) Portfolio(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID, err := uuid.Parse(userIDFromContext_str(ctx))
+	if err != nil {
+		JSONError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+
+	investments, err := h.investmentRepo.ListByUser(ctx, userID)
+	if err != nil {
+		JSONError(w, http.StatusInternalServerError, "failed to load investments")
+		return
+	}
+
+	type PortfolioItem struct {
+		InvestmentID string  `json:"investment_id"`
+		ProjectID    string  `json:"project_id"`
+		ProjectTitle string  `json:"project_title"`
+		CompanyName  string  `json:"company_name"`
+		CreatedAt    string  `json:"project_created"`
+		Amount       float64 `json:"amount"`
+		Currency     string  `json:"currency"`
+		OwnershipPct float64 `json:"ownership_pct"`
+		ProjectStatus string `json:"project_status"`
+	}
+
+	totalValue := 0.0
+	items := make([]PortfolioItem, 0, len(investments))
+
+	for _, inv := range investments {
+		project, err := h.projectRepo.FindByID(ctx, inv.ProjectID)
+		title := "(unknown)"
+		status := ""
+		created := ""
+		companyName := ""
+		if err == nil && project != nil {
+			title = project.Title
+			status = project.Status
+			created = project.CreatedAt.Format("2006-01-02")
+			if c, cerr := h.companyRepo.FindByID(ctx, project.CompanyID); cerr == nil && c != nil {
+				companyName = c.LegalName
+			}
+		}
+
+		totalValue += inv.Amount
+
+		items = append(items, PortfolioItem{
+			InvestmentID:  inv.ID.String(),
+			ProjectID:     inv.ProjectID.String(),
+			ProjectTitle:  title,
+			CompanyName:   companyName,
+			CreatedAt:     created,
+			Amount:        inv.Amount,
+			Currency:      inv.Currency,
+			OwnershipPct:  inv.OwnershipPct,
+			ProjectStatus: status,
+		})
+	}
+
+	JSON(w, http.StatusOK, map[string]interface{}{
+		"total_value": totalValue,
+		"currency":    "XOF",
+		"investments": items,
+	})
 }
 
 func userIDFromContext_str(ctx context.Context) string {

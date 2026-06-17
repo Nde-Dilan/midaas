@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/MiltonJ23/Midaas/internal/adapters/pawapay"
 	"github.com/MiltonJ23/Midaas/internal/contracts"
 	"github.com/MiltonJ23/Midaas/internal/domain"
 	"github.com/MiltonJ23/Midaas/internal/logger"
@@ -17,15 +18,16 @@ import (
 )
 
 type ProjectHandler struct {
-	projectRepo    contracts.ProjectRepository
-	milestoneRepo  contracts.MilestoneRepository
-	investmentRepo contracts.InvestmentRepository
+	projectRepo     contracts.ProjectRepository
+	milestoneRepo   contracts.MilestoneRepository
+	investmentRepo  contracts.InvestmentRepository
 	transactionRepo contracts.TransactionRepository
-	companyRepo    contracts.CompanyRepository
-	entrepRepo     contracts.EntrepreneurRepository
-	userRepo       contracts.UserRepository
-	storage        contracts.ObjectStorageService
-	notifSvc       contracts.NotificationService
+	companyRepo     contracts.CompanyRepository
+	entrepRepo      contracts.EntrepreneurRepository
+	userRepo        contracts.UserRepository
+	storage         contracts.ObjectStorageService
+	notifSvc        contracts.NotificationService
+	pawaPay         *pawapay.Client
 }
 
 func NewProjectHandler(
@@ -38,6 +40,7 @@ func NewProjectHandler(
 	userRepo contracts.UserRepository,
 	storage contracts.ObjectStorageService,
 	notifSvc contracts.NotificationService,
+	pawaPay *pawapay.Client,
 ) *ProjectHandler {
 	return &ProjectHandler{
 		projectRepo:     projectRepo,
@@ -48,7 +51,8 @@ func NewProjectHandler(
 		entrepRepo:      entrepRepo,
 		userRepo:        userRepo,
 		storage:         storage,
-		notifSvc:        notifSvc,
+		notifSvc:       notifSvc,
+		pawaPay:        pawaPay,
 	}
 }
 
@@ -402,6 +406,7 @@ func (h *ProjectHandler) cancelProject(ctx context.Context, project *domain.Proj
 
 	investments, _ := h.investmentRepo.ListByProject(ctx, project.ID)
 	for _, inv := range investments {
+		refundID := uuid.New().String()
 		tx := &domain.Transaction{
 			ID:           uuid.New(),
 			UserID:       inv.UserID,
@@ -411,9 +416,37 @@ func (h *ProjectHandler) cancelProject(ctx context.Context, project *domain.Proj
 			Currency:     inv.Currency,
 			Direction:    domain.TransactionDirectionCredit,
 			Status:       domain.TransactionStatusCompleted,
+			GatewayRef:   refundID,
 			Description:  fmt.Sprintf("Refund for cancelled project: %s", project.Title),
 		}
 		h.transactionRepo.Create(ctx, tx)
+
+		if h.pawaPay != nil && inv.DepositID != "" {
+			rReq := pawapay.RefundRequest{
+				RefundID:  refundID,
+				DepositID: inv.DepositID,
+			}
+			go func(depositID string) {
+				resp, pErr := h.pawaPay.InitiateRefund(context.Background(), rReq)
+				if pErr != nil {
+					slog.Error("handler: pawapay refund failed",
+						slog.String("error", pErr.Error()),
+						slog.String("deposit_id", depositID),
+					)
+				} else if resp.Status == "ACCEPTED" {
+					slog.Info("handler: pawapay refund initiated",
+						slog.String("refund_id", refundID),
+						slog.String("deposit_id", depositID),
+					)
+				}
+			}(inv.DepositID)
+		}
+	}
+
+	if h.notifSvc != nil {
+		for _, inv := range investments {
+			go h.notifSvc.SendRefundNotification(context.Background(), inv.UserID, project.ID, inv.Amount, inv.Currency)
+		}
 	}
 
 	logger.Info(ctx, "handler: project cancelled",

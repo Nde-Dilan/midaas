@@ -12,12 +12,13 @@ import (
 )
 
 type notificationService struct {
-	emailSvc   contracts.EmailService
-	milestoneRepo contracts.MilestoneRepository
-	projectRepo   contracts.ProjectRepository
+	emailSvc       contracts.EmailService
+	milestoneRepo  contracts.MilestoneRepository
+	projectRepo    contracts.ProjectRepository
 	investmentRepo contracts.InvestmentRepository
-	userRepo      contracts.UserRepository
-	fromEmail     string
+	userRepo       contracts.UserRepository
+	entrepRepo     contracts.EntrepreneurRepository
+	fromEmail      string
 }
 
 func NewNotificationService(
@@ -26,6 +27,7 @@ func NewNotificationService(
 	projectRepo contracts.ProjectRepository,
 	investmentRepo contracts.InvestmentRepository,
 	userRepo contracts.UserRepository,
+	entrepRepo contracts.EntrepreneurRepository,
 	fromEmail string,
 ) contracts.NotificationService {
 	return &notificationService{
@@ -34,6 +36,7 @@ func NewNotificationService(
 		projectRepo:    projectRepo,
 		investmentRepo: investmentRepo,
 		userRepo:       userRepo,
+		entrepRepo:     entrepRepo,
 		fromEmail:      fromEmail,
 	}
 }
@@ -287,4 +290,73 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return s[:max] + "..."
+}
+
+func (s *notificationService) SendRefundNotification(ctx context.Context, userID, projectID uuid.UUID, amount float64, currency string) error {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("find user: %w", err)
+	}
+	project, err := s.projectRepo.FindByID(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("find project: %w", err)
+	}
+
+	html := fmt.Sprintf(`
+	<html><body style="font-family:Arial,sans-serif;padding:40px">
+	<h2>Refund Processed</h2>
+	<p>Hello %s,</p>
+	<p>The project <strong>%s</strong> has been cancelled.</p>
+	<p>Your investment of <strong>%.2f %s</strong> has been refunded to your mobile money account.</p>
+	<p>Note: platform fees are non-refundable.</p>
+	<hr>
+	<p style="color:#888;font-size:12px">Midaas — Invest in Real Businesses</p>
+	</body></html>`,
+		user.FullName, project.Title, amount, currency,
+	)
+
+	return s.emailSvc.Send(ctx, contracts.EmailMessage{
+		To:      []string{user.Email},
+		Subject: fmt.Sprintf("Refund processed — %s", project.Title),
+		HTML:    html,
+	})
+}
+
+func (s *notificationService) SendMilestoneRejectedToEntrepreneur(ctx context.Context, milestoneID, projectID uuid.UUID, feedback string) error {
+	project, err := s.projectRepo.FindByID(ctx, projectID)
+	if err != nil {
+		return fmt.Errorf("find project: %w", err)
+	}
+	milestone, err := s.milestoneRepo.FindByID(ctx, milestoneID)
+	if err != nil {
+		return fmt.Errorf("find milestone: %w", err)
+	}
+
+	entrep, err := s.entrepRepo.FindByID(ctx, project.EntrepreneurID)
+	if err != nil {
+		return fmt.Errorf("find entrepreneur: %w", err)
+	}
+	user, err := s.userRepo.FindByID(ctx, entrep.UserID)
+	if err != nil {
+		return fmt.Errorf("find user: %w", err)
+	}
+
+	html := fmt.Sprintf(`
+	<html><body style="font-family:Arial,sans-serif;padding:40px">
+	<h2>Milestone Rejected</h2>
+	<p>Hello %s,</p>
+	<p>Your milestone <strong>%s</strong> for project <strong>%s</strong> was not approved.</p>
+	<p><strong>Admin feedback:</strong> %s</p>
+	<p>Please review the feedback, make the necessary adjustments, and resubmit the milestone proofs.</p>
+	<hr>
+	<p style="color:#888;font-size:12px">Midaas — Invest in Real Businesses</p>
+	</body></html>`,
+		user.FullName, milestone.Title, project.Title, feedback,
+	)
+
+	return s.emailSvc.Send(ctx, contracts.EmailMessage{
+		To:      []string{user.Email},
+		Subject: fmt.Sprintf("Milestone rejected — %s", milestone.Title),
+		HTML:    html,
+	})
 }
