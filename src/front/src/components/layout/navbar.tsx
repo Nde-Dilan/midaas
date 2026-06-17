@@ -189,7 +189,7 @@ export default function Navbar({ onOpen, sidebarCollapsed }: Props) {
         </button>
 
         {/* Notifications icon */}
-        <Link href="/admin/notifications">
+        <Link href="#">
           <button
             className="relative w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors"
             aria-label="Notifications"

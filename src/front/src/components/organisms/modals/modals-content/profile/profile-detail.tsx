@@ -22,7 +22,7 @@ interface FormInput {
 export default function ProfileDetailModal() {
   const { toggle } = useModalStore();
   const { user } = useAuthStore();
-  const displayName = user?.name?.trim() || "Utilisateur";
+  const displayName = user?.name?.trim() || "User";
 
   const { control, setValue } = useForm<FormInput>({
     defaultValues: {
@@ -36,7 +36,7 @@ export default function ProfileDetailModal() {
     if (!user) return;
 
     setValue("profileType", user.profileType || "owner");
-    setValue("name", user.name || "Utilisateur");
+    setValue("name", user.name || "User");
     setValue("email", user.email || "");
   }, [user, setValue]);
 
@@ -74,7 +74,7 @@ export default function ProfileDetailModal() {
   if (!user) return null;
 
   return (
-    <section className="w-full bg-background p-8">
+    <section className="w-full bg-white p-8 rounded-2xl">
       <div className="w-full flex items-center justify-between">
         <h2 className="text-lg font-MontserratBold">Profile</h2>
 
@@ -154,14 +154,11 @@ export default function ProfileDetailModal() {
                 onValueChange={(value) => field.onChange(value)}
               >
                 <SelectTrigger className="w-full h-[50px] bg-background mb-6">
-                  <SelectValue
-                    placeholder="Type de profile"
-                    className="text-md"
-                  />
+                  <SelectValue placeholder="Profile type" className="text-md" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="owner">Propriétaire</SelectItem>
-                  <SelectItem value="agencies">Agence</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="agencies">Agency</SelectItem>
                 </SelectContent>
               </Select>
             )}
@@ -175,7 +172,7 @@ export default function ProfileDetailModal() {
             render={({ field }) => (
               <MUIInput
                 className="w-full mb-6"
-                label="Nom complet"
+                label="Full name"
                 after={
                   <svg
                     width="20"
