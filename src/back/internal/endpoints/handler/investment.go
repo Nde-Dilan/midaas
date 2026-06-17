@@ -126,6 +126,8 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pawaPayStatus := "not_configured"
+
 	if h.pawaPay != nil {
 		depReq := pawapay.DepositRequest{
 			DepositID: depositID,
@@ -140,9 +142,12 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		resp, err := h.pawaPay.InitiateDeposit(context.Background(), depReq)
 		if err != nil {
 			logger.Error(ctx, "handler: pawapay deposit failed", slog.String("error", err.Error()))
-		} else if resp.Status == "ACCEPTED" {
-			investment.Status = domain.InvestmentStatusConfirmed
-			h.investmentRepo.Update(ctx, investment)
+			pawaPayStatus = "error: " + err.Error()
+		} else {
+			pawaPayStatus = resp.Status
+			if resp.FailureReason != nil {
+				pawaPayStatus = resp.Status + " (" + resp.FailureReason.FailureCode + ")"
+			}
 		}
 	}
 
@@ -211,6 +216,8 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		"remaining":        project.FundingGoal - project.FundingRaised,
 		"funding_progress": fmt.Sprintf("%.1f%%", project.FundingRaised/project.FundingGoal*100),
 		"deposit_id":       depositID,
+		"pawapay_status":   pawaPayStatus,
+		"provider":         input.Provider,
 	})
 }
 
