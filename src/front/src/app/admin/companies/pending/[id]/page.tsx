@@ -585,11 +585,14 @@ function StepLegal({ company }: { company: AdminCompanyDetail }) {
 
       <div className="space-y-3">
         <DocRow label="Document RCCM" urls={docs?.rccm_docs} />
-        <DocRow label="NIU (Identifiant fiscal)" urls={company.niu_docs} />
-        <DocRow label="Statuts de l'entreprise" urls={company.statuts_docs} />
         <DocRow
-          label="Document de localisation (premises)"
-          urls={company.premises_docs}
+          label="NIU (Identifiant fiscal)"
+          urls={docs?.niu_doc_url ? [docs.niu_doc_url] : undefined}
+        />
+        <DocRow label="Statuts de l'entreprise" urls={docs?.statuts_docs} />
+        <DocRow
+          label="Photos des locaux (premises)"
+          urls={docs?.premises_photos}
         />
       </div>
     </div>
@@ -713,13 +716,15 @@ function StepDocuments({ company }: { company: AdminCompanyDetail }) {
     <div className="space-y-4">
       <DocRow
         label="Permis et licences sectoriels"
-        urls={company.sector_permits_docs}
+        urls={company.legal_docs?.sector_permits}
       />
       <DocRow
         label="Documents de garantie (collatéral)"
-        urls={company.collateral_docs}
+        urls={
+          (company as any).operations?.collateral_proof_docs
+        }
       />
-      <DocRow label="Pièces d'identité" urls={company.identity_docs} />
+      <DocRow label="Pièces d'identité" urls={undefined} />
     </div>
   );
 }

@@ -195,7 +195,7 @@ export const sidebar: SidebarItem[] = [
   /* ─── Admin Section ──────────────────────────────────── */
   {
     key: 5,
-    title: "Pending Companies",
+    title: "Companies",
     link: "/admin/companies/pending",
     allowedRoles: ["ROLE_ADMIN"],
     icon: {
@@ -233,6 +233,44 @@ export const sidebar: SidebarItem[] = [
   },
   {
     key: 6,
+    title: "Campaigns",
+    link: "/admin/campaigns/pending",
+    allowedRoles: ["ROLE_ADMIN"],
+    icon: {
+      default: (
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#5E0E08"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+          <path d="M12 6v6l4 2"></path>
+        </svg>
+      ),
+      active: (
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+          <path d="M12 6v6l4 2"></path>
+        </svg>
+      ),
+    },
+  },
+  {
+    key: 7,
     title: "Entrepreneurs",
     link: "/admin/entrepreneurs",
     allowedRoles: ["ROLE_ADMIN"],
@@ -274,7 +312,7 @@ export const sidebar: SidebarItem[] = [
     },
   },
   {
-    key: 7,
+    key: 8,
     title: "Users",
     link: "/admin/users",
     allowedRoles: ["ROLE_ADMIN"],

@@ -107,7 +107,7 @@ export default function AdminPendingCompaniesPage() {
             className="gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-            Actualiser
+            Refresh
           </Button>
         </div>
 

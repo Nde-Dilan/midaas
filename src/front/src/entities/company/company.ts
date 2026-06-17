@@ -85,10 +85,11 @@ export default class Company {
 
   get statusLabel(): string {
     const labels: Record<string, string> = {
-      draft: "Brouillon",
-      pending: "En attente",
-      approved: "Approuvé",
-      rejected: "Rejeté",
+      draft: "Draft",
+      pending: "Pending",
+      approved: "Approved",
+      rejected: "Rejected",
+      reverify_requested: "Re-verification",
     };
     return labels[this._status] || this._status;
   }
@@ -96,9 +97,10 @@ export default class Company {
   get statusColor(): string {
     const colors: Record<string, string> = {
       draft: "bg-gray-100 text-gray-800",
-      pending: "bg-yellow-100 text-yellow-800",
+      pending: "bg-amber-100 text-amber-800",
       approved: "bg-green-100 text-green-800",
       rejected: "bg-red-100 text-red-800",
+      reverify_requested: "bg-purple-100 text-purple-800",
     };
     return colors[this._status] || "bg-gray-100 text-gray-800";
   }

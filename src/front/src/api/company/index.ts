@@ -41,8 +41,8 @@ export const companyProvider = {
 
         return response;
       },
-      "Impossible de récupérer la liste des entreprises",
-      "Liste des entreprises récupérée avec succès",
+      "Unable to fetch company list",
+      "Company list retrieved successfully",
     );
   },
 
@@ -74,8 +74,8 @@ export const companyProvider = {
 
         return response;
       },
-      "Impossible de récupérer les détails de l'entreprise",
-      "Détails de l'entreprise récupérés avec succès",
+      "Unable to fetch company details",
+      "Company details retrieved successfully",
     );
   },
 
@@ -99,7 +99,7 @@ export const companyProvider = {
           return {
             status: response.status,
             data: {
-              message: response.data?.message ?? "Entreprise créée avec succès",
+              message: response.data?.message ?? "Company created successfully",
               company,
             },
           };
@@ -107,7 +107,7 @@ export const companyProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la création de l'entreprise",
+      "An error occurred while creating the company",
     );
   },
 
@@ -131,8 +131,7 @@ export const companyProvider = {
           return {
             status: response.status,
             data: {
-              message:
-                response.data?.message ?? "Entreprise mise à jour avec succès",
+              message: response.data?.message ?? "Company updated successfully",
               company,
             },
           };
@@ -140,7 +139,7 @@ export const companyProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la mise à jour de l'entreprise",
+      "An error occurred while updating the company",
     );
   },
 
@@ -156,14 +155,13 @@ export const companyProvider = {
         return {
           status: response.status,
           data: {
-            message:
-              response.data?.message ?? "Entreprise supprimée avec succès",
+            message: response.data?.message ?? "Company deleted successfully",
           },
         };
       }
 
       return response;
-    }, "Une erreur s'est produite lors de la suppression de l'entreprise");
+    }, "An error occurred while deleting the company");
   },
 
   /**
@@ -232,7 +230,7 @@ export const companyProvider = {
       }
 
       return response;
-    }, "Impossible de récupérer la liste des entreprises approuvées");
+    }, "Unable to fetch approved companies");
   },
 
   /**
@@ -270,5 +268,168 @@ export const companyProvider = {
       },
       `Failed to upload ${category} documents`,
     );
+  },
+
+  /**
+   * PUT /companies/:id/legal-docs
+   * Save or update the legal documents metadata (RCCM number, NIU, etc.)
+   * and document URLs. Call this AFTER uploading files so you have the URLs.
+   */
+  async saveLegalDocs(
+    id: string,
+    data: {
+      rccm_number?: string;
+      rccm_expiry_date?: string;
+      rccm_docs?: string[];
+      niu_number?: string;
+      niu_doc_url?: string;
+      statuts_docs?: string[];
+      localisation_doc_url?: string;
+      premises_photos?: string[];
+      sector_permits?: string[];
+    },
+  ) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.put(`/companies/${id}/legal-docs`, data);
+      if (response.status === 200) {
+        return { status: response.status, data: toObject(response.data) ?? {} };
+      }
+      return response;
+    }, "Failed to save legal documents");
+  },
+
+  /**
+   * PUT /companies/:id/financials
+   * Save or update financial information (DSF years, bank/momo statements).
+   */
+  async saveFinancials(
+    id: string,
+    data: {
+      dsf_years?: number[];
+      dsf_stamped_docs?: string[];
+      anr_issue_date?: string;
+      anr_expiry_date?: string;
+      anr_doc_url?: string;
+      cnps_clearance_url?: string;
+      bank_statements?: string[];
+      momo_statements?: string[];
+    },
+  ) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.put(`/companies/${id}/financials`, data);
+      if (response.status === 200) {
+        return { status: response.status, data: toObject(response.data) ?? {} };
+      }
+      return response;
+    }, "Failed to save financial information");
+  },
+
+  /**
+   * POST /companies/:id/beneficial-owners
+   * Add a beneficial owner to the company.
+   */
+  async addBeneficialOwner(
+    id: string,
+    data: {
+      full_name: string;
+      equity_percentage: number;
+      identity_docs?: string[];
+    },
+  ) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.post(
+        `/companies/${id}/beneficial-owners`,
+        data,
+      );
+      if (response.status === 201) {
+        return {
+          status: response.status,
+          data: toObject(response.data) ?? {},
+        };
+      }
+      return response;
+    }, "Failed to add beneficial owner");
+  },
+
+  /**
+   * POST /companies/:id/managers
+   * Add a manager to the company.
+   */
+  async addManager(
+    id: string,
+    data: {
+      full_name: string;
+      role?: string;
+      identity_docs?: string[];
+      casier_judiciaire_url?: string;
+      casier_judiciaire_date?: string;
+      cv_url?: string;
+    },
+  ) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.post(`/companies/${id}/managers`, data);
+      if (response.status === 201) {
+        return {
+          status: response.status,
+          data: toObject(response.data) ?? {},
+        };
+      }
+      return response;
+    }, "Failed to add manager");
+  },
+
+  /**
+   * DELETE /companies/:id/beneficial-owners/:ownerId
+   * Remove a beneficial owner.
+   */
+  async removeBeneficialOwner(id: string, ownerId: string) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.delete(
+        `/companies/${id}/beneficial-owners/${ownerId}`,
+      );
+      if (response.status === 200) {
+        return { status: response.status, data: toObject(response.data) ?? {} };
+      }
+      return response;
+    }, "Failed to remove beneficial owner");
+  },
+
+  /**
+   * DELETE /companies/:id/managers/:managerId
+   * Remove a manager.
+   */
+  async removeManager(id: string, managerId: string) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.delete(
+        `/companies/${id}/managers/${managerId}`,
+      );
+      if (response.status === 200) {
+        return { status: response.status, data: toObject(response.data) ?? {} };
+      }
+      return response;
+    }, "Failed to remove manager");
+  },
+
+  /**
+   * PUT /companies/:id/operations
+   * Save operational data (suppliers, clients, collateral, continuity).
+   */
+  async saveOperations(
+    id: string,
+    data: {
+      top_suppliers?: unknown;
+      top_clients?: unknown;
+      collateral_type?: string;
+      collateral_proof_docs?: string[];
+      continuity_infrastructure?: string;
+    },
+  ) {
+    return await withErrorHandling<Record<string, any>>(async () => {
+      const response = await instance.put(`/companies/${id}/operations`, data);
+      if (response.status === 200) {
+        return { status: response.status, data: toObject(response.data) ?? {} };
+      }
+      return response;
+    }, "Failed to save operational data");
   },
 };

@@ -383,42 +383,142 @@ export default function CompanyRegistrationForm({
   const handleSubmit = useCallback(async () => {
     setSubmitting(true);
 
-    // 1. Upload all pending documents in parallel
-    const uploadTasks: Promise<void>[] = [];
+    // 1. Upload all pending documents in parallel and collect URLs
+    const docUrls: Record<string, string[]> = {};
 
-    (Object.entries(DOCUMENT_FIELD_TO_CATEGORY) as [keyof FormState, string][])
-      .filter(([, category]) => category) // skip non-file fields
-      .forEach(([field, category]) => {
+    const uploadTasks = (
+      Object.entries(DOCUMENT_FIELD_TO_CATEGORY) as [keyof FormState, string][]
+    )
+      .filter(([, category]) => category)
+      .map(async ([field, category]) => {
         const files = form[field] as UploadedFile[] | undefined;
         if (!files) return;
         const pending = files.filter((f) => !f.uploaded && f.file.size > 0);
-        if (pending.length > 0) {
-          uploadTasks.push(
-            (async () => {
-              await uploadAllForCategory(field, category);
-            })(),
-          );
+        if (pending.length === 0) {
+          // Already uploaded – collect existing URLs
+          docUrls[category] = files
+            .filter((f) => f.uploaded && f.url)
+            .map((f) => f.url!);
+          return;
+        }
+        // Upload pending files for this category
+        const { data, error } = await companyProvider.uploadDocuments(
+          company.id,
+          pending.map((f) => f.file),
+          category,
+        );
+        if (data) {
+          docUrls[category] = data.urls;
+          // Mark them uploaded in local state
+          setForm((prev) => {
+            const updated = [...(prev[field] as UploadedFile[])];
+            let urlIdx = 0;
+            updated.forEach((f, i) => {
+              if (!f.uploaded && f.file.size > 0) {
+                updated[i] = {
+                  ...updated[i],
+                  uploaded: true,
+                  url: data.urls[urlIdx++],
+                };
+              }
+            });
+            return { ...prev, [field]: updated };
+          });
+        } else {
+          throw new Error(error || `Failed to upload ${category} files`);
         }
       });
 
-    if (uploadTasks.length > 0) {
-      await Promise.allSettled(uploadTasks);
-    }
+    try {
+      await Promise.all(uploadTasks);
 
-    // 2. Submit company for validation
-    const { data, error } = await companyProvider.submitForValidation(
-      company.id,
-    );
+      // 2. Save legal documents
+      const legalPayload: Record<string, any> = {};
+      if (form.rccmNumber) legalPayload.rccm_number = form.rccmNumber;
+      if (docUrls.rccm?.length) legalPayload.rccm_docs = docUrls.rccm;
+      if (docUrls.niu?.length) legalPayload.niu_doc_url = docUrls.niu[0];
+      if (docUrls.statuts?.length) legalPayload.statuts_docs = docUrls.statuts;
+      if (docUrls.premises?.length)
+        legalPayload.premises_photos = docUrls.premises;
+      if (docUrls.sector_permits?.length)
+        legalPayload.sector_permits = docUrls.sector_permits;
 
-    if (data) {
-      toast.success("Company submitted for validation successfully!");
-      onComplete();
-    } else {
-      toast.error(error || "Failed to submit company");
+      if (Object.keys(legalPayload).length > 0) {
+        const { error: legalErr } = await companyProvider.saveLegalDocs(
+          company.id,
+          legalPayload,
+        );
+        if (legalErr) throw new Error(legalErr);
+      }
+
+      // 3. Save financial information
+      const financialPayload: Record<string, any> = {};
+      if (form.dsfYears.trim()) {
+        financialPayload.dsf_years = form.dsfYears
+          .split(",")
+          .map((y) => parseInt(y.trim(), 10))
+          .filter((n) => !isNaN(n));
+      }
+      if (docUrls.bank_statements?.length)
+        financialPayload.bank_statements = docUrls.bank_statements;
+      if (docUrls.momo_statements?.length)
+        financialPayload.momo_statements = docUrls.momo_statements;
+
+      if (Object.keys(financialPayload).length > 0) {
+        const { error: finErr } = await companyProvider.saveFinancials(
+          company.id,
+          financialPayload,
+        );
+        if (finErr) throw new Error(finErr);
+      }
+
+      // 4. Add beneficial owners
+      const validOwners = form.beneficialOwners.filter(
+        (o) => o.fullName.trim() && o.equityPercentage.trim(),
+      );
+      for (const owner of validOwners) {
+        const { error: ownerErr } = await companyProvider.addBeneficialOwner(
+          company.id,
+          {
+            full_name: owner.fullName.trim(),
+            equity_percentage: parseFloat(owner.equityPercentage),
+          },
+        );
+        if (ownerErr) throw new Error(ownerErr);
+      }
+
+      // 5. Add managers
+      const validManagers = form.managers.filter(
+        (m) => m.fullName.trim() && m.role.trim(),
+      );
+      for (const manager of validManagers) {
+        const { error: mgrErr } = await companyProvider.addManager(
+          company.id,
+          {
+            full_name: manager.fullName.trim(),
+            role: manager.role.trim(),
+          },
+        );
+        if (mgrErr) throw new Error(mgrErr);
+      }
+
+      // 6. Submit company for validation
+      const { data, error } = await companyProvider.submitForValidation(
+        company.id,
+      );
+
+      if (data) {
+        toast.success("Company submitted for validation successfully!");
+        onComplete();
+      } else {
+        throw new Error(error || "Failed to submit company");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred during submission");
     }
 
     setSubmitting(false);
-  }, [form, company.id, onComplete, uploadAllForCategory]);
+  }, [form, company.id, onComplete]);
 
   /* ── Navigation ────────────────────────────── */
   const nextStep = useCallback(() => {

@@ -1,5 +1,21 @@
 import Milestone from "./milestone";
 
+/* ─── Risk Zone ──────────────────────────── */
+export interface RiskZone {
+  description: string;
+  severity: string;
+  mitigation: string;
+}
+
+/* ─── Use of Funds Item ─────────────────── */
+export interface UseOfFund {
+  category: string;
+  amount: number;
+  percentage: number;
+  details: string;
+}
+
+/* ─── Project / Campaign Interface ──────── */
 export interface IProject {
   id: string;
   company_id?: string;
@@ -17,6 +33,26 @@ export interface IProject {
   created_at?: string;
   updated_at?: string;
   milestones?: Milestone[];
+
+  // ROI & Break-even
+  short_term_roi?: number;
+  short_term_months?: number;
+  medium_term_roi?: number;
+  medium_term_months?: number;
+  long_term_roi?: number;
+  long_term_months?: number;
+  break_even_months?: number;
+
+  // Risk & Funds
+  risk_zones?: RiskZone[];
+  use_of_funds?: UseOfFund[];
+
+  // Documents & Analysis
+  business_plan_docs?: string[];
+  financial_projections?: string[];
+  market_analysis?: string;
+  competitive_advantage?: string;
+  team_background?: string;
 }
 
 export default class Project {
@@ -37,6 +73,26 @@ export default class Project {
   private _updatedAt: Date;
   private _milestones: Milestone[];
 
+  // ROI & Break-even
+  private _shortTermRoi?: number;
+  private _shortTermMonths?: number;
+  private _mediumTermRoi?: number;
+  private _mediumTermMonths?: number;
+  private _longTermRoi?: number;
+  private _longTermMonths?: number;
+  private _breakEvenMonths?: number;
+
+  // Risk & Funds
+  private _riskZones: RiskZone[];
+  private _useOfFunds: UseOfFund[];
+
+  // Documents & Analysis
+  private _businessPlanDocs: string[];
+  private _financialProjections: string[];
+  private _marketAnalysis: string;
+  private _competitiveAdvantage: string;
+  private _teamBackground: string;
+
   constructor(data: IProject) {
     this._id = data.id;
     this._companyId = data.company_id;
@@ -54,6 +110,23 @@ export default class Project {
     this._createdAt = data.created_at ? new Date(data.created_at) : new Date();
     this._updatedAt = data.updated_at ? new Date(data.updated_at) : new Date();
     this._milestones = data.milestones?.map((m) => new Milestone(m)) ?? [];
+
+    this._shortTermRoi = data.short_term_roi;
+    this._shortTermMonths = data.short_term_months;
+    this._mediumTermRoi = data.medium_term_roi;
+    this._mediumTermMonths = data.medium_term_months;
+    this._longTermRoi = data.long_term_roi;
+    this._longTermMonths = data.long_term_months;
+    this._breakEvenMonths = data.break_even_months;
+
+    this._riskZones = data.risk_zones ?? [];
+    this._useOfFunds = data.use_of_funds ?? [];
+
+    this._businessPlanDocs = data.business_plan_docs ?? [];
+    this._financialProjections = data.financial_projections ?? [];
+    this._marketAnalysis = data.market_analysis ?? "";
+    this._competitiveAdvantage = data.competitive_advantage ?? "";
+    this._teamBackground = data.team_background ?? "";
   }
 
   get id(): string {
@@ -120,6 +193,54 @@ export default class Project {
     return this._milestones;
   }
 
+  // ── ROI & Break-even ───────────────────
+  get shortTermRoi(): number | undefined {
+    return this._shortTermRoi;
+  }
+  get shortTermMonths(): number | undefined {
+    return this._shortTermMonths;
+  }
+  get mediumTermRoi(): number | undefined {
+    return this._mediumTermRoi;
+  }
+  get mediumTermMonths(): number | undefined {
+    return this._mediumTermMonths;
+  }
+  get longTermRoi(): number | undefined {
+    return this._longTermRoi;
+  }
+  get longTermMonths(): number | undefined {
+    return this._longTermMonths;
+  }
+  get breakEvenMonths(): number | undefined {
+    return this._breakEvenMonths;
+  }
+
+  // ── Risk & Funds ───────────────────────
+  get riskZones(): RiskZone[] {
+    return this._riskZones;
+  }
+  get useOfFunds(): UseOfFund[] {
+    return this._useOfFunds;
+  }
+
+  // ── Docs & Analysis ────────────────────
+  get businessPlanDocs(): string[] {
+    return this._businessPlanDocs;
+  }
+  get financialProjections(): string[] {
+    return this._financialProjections;
+  }
+  get marketAnalysis(): string {
+    return this._marketAnalysis;
+  }
+  get competitiveAdvantage(): string {
+    return this._competitiveAdvantage;
+  }
+  get teamBackground(): string {
+    return this._teamBackground;
+  }
+
   get progressPercentage(): number {
     if (this._fundingGoal <= 0) return 0;
     return Math.min(
@@ -171,5 +292,37 @@ export default class Project {
     if (data.milestones !== undefined) {
       this._milestones = data.milestones.map((m) => new Milestone(m));
     }
+
+    // ROI & Break-even
+    if (data.short_term_roi !== undefined)
+      this._shortTermRoi = data.short_term_roi;
+    if (data.short_term_months !== undefined)
+      this._shortTermMonths = data.short_term_months;
+    if (data.medium_term_roi !== undefined)
+      this._mediumTermRoi = data.medium_term_roi;
+    if (data.medium_term_months !== undefined)
+      this._mediumTermMonths = data.medium_term_months;
+    if (data.long_term_roi !== undefined)
+      this._longTermRoi = data.long_term_roi;
+    if (data.long_term_months !== undefined)
+      this._longTermMonths = data.long_term_months;
+    if (data.break_even_months !== undefined)
+      this._breakEvenMonths = data.break_even_months;
+
+    // Risk & Funds
+    if (data.risk_zones !== undefined) this._riskZones = data.risk_zones;
+    if (data.use_of_funds !== undefined) this._useOfFunds = data.use_of_funds;
+
+    // Docs & Analysis
+    if (data.business_plan_docs !== undefined)
+      this._businessPlanDocs = data.business_plan_docs;
+    if (data.financial_projections !== undefined)
+      this._financialProjections = data.financial_projections;
+    if (data.market_analysis !== undefined)
+      this._marketAnalysis = data.market_analysis;
+    if (data.competitive_advantage !== undefined)
+      this._competitiveAdvantage = data.competitive_advantage;
+    if (data.team_background !== undefined)
+      this._teamBackground = data.team_background;
   }
 }

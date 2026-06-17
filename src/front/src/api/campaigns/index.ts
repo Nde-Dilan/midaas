@@ -2,11 +2,7 @@ import { withErrorHandling } from "@/api/api-wrapper-utility";
 import instance from "..";
 import Project, { IProject } from "@/entities/project/project";
 import Milestone, { IMilestone } from "@/entities/project/milestone";
-import {
-  CreateCampaignDto,
-  CreateMilestoneDto,
-  UpdateCampaignDto,
-} from "./dto";
+import { CreateCampaignDto, MilestoneBatchDto, UpdateCampaignDto } from "./dto";
 
 const toArray = (payload: any): any[] => {
   if (Array.isArray(payload?.Data)) return payload.Data;
@@ -80,7 +76,7 @@ export const campaignProvider = {
   async getAll() {
     return await withErrorHandling<Project[]>(
       async () => {
-        const response = await instance.get("/projects");
+        const response = await instance.get("/projects/my");
 
         if (response.status === 200) {
           const projects = toArray(response.data).map(
@@ -253,12 +249,12 @@ export const campaignProvider = {
 
         return response;
       },
-      "Impossible de récupérer les jalons",
-      "Jalons récupérés avec succès",
+      "Unable to fetch milestones",
+      "Milestones retrieved successfully",
     );
   },
 
-  async createMilestone(projectId: string, payload: CreateMilestoneDto) {
+  async createMilestone(projectId: string, payload: MilestoneBatchDto) {
     return await withErrorHandling<{ message: string; milestone?: Milestone }>(
       async () => {
         const response = await instance.post(
@@ -277,7 +273,8 @@ export const campaignProvider = {
           return {
             status: response.status,
             data: {
-              message: response.data?.message ?? "Jalon créé avec succès",
+              message:
+                response.data?.message ?? "Milestone created successfully",
               milestone,
             },
           };
@@ -285,14 +282,14 @@ export const campaignProvider = {
 
         return response;
       },
-      "Une erreur s'est produite lors de la création du jalon",
+      "An error occurred while creating the milestone",
     );
   },
 
   async updateMilestone(
     projectId: string,
     milestoneId: string,
-    payload: Partial<CreateMilestoneDto>,
+    payload: Partial<MilestoneBatchDto>,
   ) {
     return await withErrorHandling<{ message: string; milestone?: Milestone }>(
       async () => {

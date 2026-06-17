@@ -89,55 +89,53 @@ export interface AdminCompanyDetail {
   created_at?: string;
   updated_at?: string;
 
-  /** Legal documents block */
+  /** Legal documents block — mirrors domain.CompanyLegalDocs */
   legal_docs?: {
     rccm_number?: string;
+    rccm_expiry_date?: string;
     rccm_docs?: string[];
+    niu_number?: string;
+    niu_doc_url?: string;
+    statuts_docs?: string[];
+    localisation_doc_url?: string;
+    premises_photos?: string[];
+    sector_permits?: string[];
   };
 
-  /** Financial information block */
+  /** Financial information block — mirrors domain.CompanyFinancials */
   financials?: {
     dsf_years?: number[];
+    dsf_stamped_docs?: string[];
+    anr_issue_date?: string;
+    anr_expiry_date?: string;
+    anr_doc_url?: string;
+    cnps_clearance_url?: string;
     bank_statements?: string[];
     momo_statements?: string[];
+  };
+
+  /** Operations block — mirrors domain.CompanyOperations */
+  operations?: {
+    collateral_type?: string;
+    collateral_proof_docs?: string[];
+    continuity_infrastructure?: string;
   };
 
   /** Beneficial owners */
   beneficial_owners?: {
     full_name: string;
     equity_percentage: number;
+    identity_docs?: string[];
   }[];
 
   /** Management team */
   managers?: {
     full_name: string;
     role: string;
+    identity_docs?: string[];
+    cv_url?: string;
+    casier_judiciaire_url?: string;
   }[];
-
-  /** Uploaded document URLs by category (flat from API) */
-  niu_docs?: string[];
-  statuts_docs?: string[];
-  premises_docs?: string[];
-  sector_permits_docs?: string[];
-  collateral_docs?: string[];
-  identity_docs?: string[];
-  bank_statements_docs?: string[];
-  momo_statements_docs?: string[];
-
-  /** Uploaded document URLs by category (grouped) */
-  documents?: Record<
-    | "rccm"
-    | "niu"
-    | "statuts"
-    | "premises"
-    | "sector_permits"
-    | "dsf"
-    | "bank_statements"
-    | "momo_statements"
-    | "collateral"
-    | "identity",
-    string[] | undefined
-  >;
 
   entrepreneur?: {
     id: string;
@@ -176,6 +174,70 @@ export interface AdminUserItem {
   updated_at?: string;
   is_entrepreneur?: boolean;
   entrepreneur_status?: string;
+}
+
+/* ═══════════════════════════════════════════════
+   Project / Campaign types
+   ═══════════════════════════════════════════════ */
+
+export interface AdminMilestoneItem {
+  id: string;
+  project_id?: string;
+  title: string;
+  description?: string;
+  order_num?: number;
+  fund_allocation?: number;
+  status?: string;
+  due_date?: string;
+  notes?: string;
+  proof_urls?: string[];
+  feedback?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AdminProjectItem {
+  id: string;
+  title: string;
+  description?: string;
+  funding_goal: number;
+  funding_raised?: number;
+  currency?: string;
+  status?: string;
+  category?: string;
+  cover_image_url?: string;
+  company_id?: string;
+  entrepreneur_id?: string;
+  short_term_roi?: number;
+  short_term_months?: number;
+  medium_term_roi?: number;
+  medium_term_months?: number;
+  long_term_roi?: number;
+  long_term_months?: number;
+  break_even_months?: number;
+  risk_zones?: { description: string; severity: string; mitigation: string }[];
+  use_of_funds?: { category: string; amount: number; percentage: number; details: string }[];
+  business_plan_docs?: string[];
+  financial_projections?: string[];
+  market_analysis?: string;
+  competitive_advantage?: string;
+  team_background?: string;
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
+  updated_at?: string;
+  milestones?: AdminMilestoneItem[];
+  company?: {
+    id: string;
+    legal_name: string;
+    trade_name?: string;
+    corporate_form: string;
+    industry_sector?: string;
+    physical_address?: string;
+    status?: string;
+    entrepreneur?: { id: string; user?: { full_name?: string; email?: string } };
+  };
+  investor_count?: number;
 }
 
 /* ───────────────────────────────────────────────
@@ -425,6 +487,174 @@ export const adminProvider = {
       },
       "Erreur lors de l'activation de l'entrepreneur",
       "Entrepreneur activé",
+    );
+  },
+
+  /* ═══════════════════════════════════════════════
+     Projects / Campaigns
+     ═══════════════════════════════════════════════ */
+
+  /**
+   * GET /admin/projects/pending
+   * List all projects with full details (milestones, investments, company).
+   */
+  async getPendingProjects() {
+    return await withErrorHandling<AdminProjectItem[]>(async () => {
+      const response = await instance.get("/admin/projects/pending", {
+        headers: getAdminAuthHeader(),
+      });
+
+      if (response.status === 200) {
+        return {
+          status: response.status,
+          data: toArray(response.data),
+        };
+      }
+
+      return response;
+    }, "Failed to load pending projects");
+  },
+
+  /**
+   * GET /projects/{id}
+   * Fetch full project details including milestones, investments, company.
+   */
+  async getProjectDetail(id: string) {
+    return await withErrorHandling<AdminProjectItem>(async () => {
+      const response = await instance.get(`/projects/${id}`, {
+        headers: getAdminAuthHeader(),
+      });
+
+      if (response.status === 200) {
+        const detail = toObject(response.data);
+        return {
+          status: response.status,
+          data: (detail ?? {}) as AdminProjectItem,
+        };
+      }
+
+      return response;
+    }, "Failed to load project details");
+  },
+
+  /**
+   * POST /admin/projects/{id}/approve
+   * Approve a project → active.
+   */
+  async approveProject(id: string) {
+    return await withErrorHandling<{ id: string; status: string }>(
+      async () => {
+        const response = await instance.post(
+          `/admin/projects/${id}/approve`,
+          {},
+          { headers: getAdminAuthHeader() },
+        );
+        if (response.status === 200) {
+          const body = toObject(response.data);
+          return { status: response.status, data: body ?? { id, status: "active" } };
+        }
+        return response;
+      },
+      "Failed to approve project",
+      "Project approved successfully",
+    );
+  },
+
+  /**
+   * POST /admin/projects/{id}/reject
+   * Reject a project.
+   */
+  async rejectProject(id: string, reason?: string) {
+    return await withErrorHandling<{ id: string; status: string }>(
+      async () => {
+        const payload: Record<string, string> = {};
+        if (reason) payload.reason = reason;
+        const response = await instance.post(
+          `/admin/projects/${id}/reject`,
+          payload,
+          { headers: getAdminAuthHeader() },
+        );
+        if (response.status === 200) {
+          const body = toObject(response.data);
+          return { status: response.status, data: body ?? { id, status: "rejected" } };
+        }
+        return response;
+      },
+      "Failed to reject project",
+      "Project rejected",
+    );
+  },
+
+  /* ═══════════════════════════════════════════════
+     Milestones
+     ═══════════════════════════════════════════════ */
+
+  /**
+   * GET /admin/milestones/pending
+   * List all milestones pending review (under_review).
+   */
+  async getPendingMilestones() {
+    return await withErrorHandling<AdminMilestoneItem[]>(async () => {
+      const response = await instance.get("/admin/milestones/pending", {
+        headers: getAdminAuthHeader(),
+      });
+
+      if (response.status === 200) {
+        return {
+          status: response.status,
+          data: toArray(response.data),
+        };
+      }
+
+      return response;
+    }, "Failed to load pending milestones");
+  },
+
+  /**
+   * POST /admin/milestones/{id}/approve
+   * Approve a milestone + send investor emails with proofs.
+   */
+  async approveMilestone(id: string) {
+    return await withErrorHandling<{ id: string; status: string }>(
+      async () => {
+        const response = await instance.post(
+          `/admin/milestones/${id}/approve`,
+          {},
+          { headers: getAdminAuthHeader() },
+        );
+        if (response.status === 200) {
+          const body = toObject(response.data);
+          return { status: response.status, data: body ?? { id, status: "approved" } };
+        }
+        return response;
+      },
+      "Failed to approve milestone",
+      "Milestone approved, investors notified",
+    );
+  },
+
+  /**
+   * POST /admin/milestones/{id}/reject
+   * Reject a milestone with feedback.
+   */
+  async rejectMilestone(id: string, feedback?: string) {
+    return await withErrorHandling<{ id: string; status: string }>(
+      async () => {
+        const payload: Record<string, string> = {};
+        if (feedback) payload.feedback = feedback;
+        const response = await instance.post(
+          `/admin/milestones/${id}/reject`,
+          payload,
+          { headers: getAdminAuthHeader() },
+        );
+        if (response.status === 200) {
+          const body = toObject(response.data);
+          return { status: response.status, data: body ?? { id, status: "rejected" } };
+        }
+        return response;
+      },
+      "Failed to reject milestone",
+      "Milestone rejected, feedback sent",
     );
   },
 

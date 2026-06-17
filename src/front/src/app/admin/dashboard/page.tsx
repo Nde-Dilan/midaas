@@ -36,9 +36,11 @@ export default function DashboardPage() {
     pendingCompanies,
     entrepreneurs,
     users,
+    pendingProjects,
     setPendingCompanies,
     setEntrepreneurs,
     setUsers,
+    setPendingProjects,
   } = useAdminStore();
   const { companies, count: companyCount } = useCompanyStore();
   const { campaigns, count: campaignCount } = useCampaignsStore();
@@ -79,6 +81,11 @@ export default function DashboardPage() {
     if (users.length === 0) {
       adminProvider.getUsers().then(({ data }) => {
         if (data) setUsers(data);
+      });
+    }
+    if (pendingProjects.length === 0) {
+      adminProvider.getPendingProjects().then(({ data }) => {
+        if (data) setPendingProjects(data);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,6 +139,20 @@ export default function DashboardPage() {
               </div>
             </Link>
 
+            <Link href="/admin/campaigns/pending">
+              <div className="bg-white rounded-xl border border-border p-5 hover:shadow-md transition-shadow cursor-pointer">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-500">Pending Campaigns</p>
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-blue-600" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold mt-2">
+                  {pendingProjects.length}
+                </p>
+              </div>
+            </Link>
+
             <Link href="/admin/companies/pending">
               <div className="bg-white rounded-xl border border-border p-5 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex items-center justify-between">
@@ -170,7 +191,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Link href="/admin/companies/pending">
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-6 hover:shadow-lg transition-all">
                 <div className="flex items-center gap-4">
@@ -184,6 +205,26 @@ export default function DashboardPage() {
                     <p className="text-sm text-gray-500 mt-0.5">
                       {pendingReviewCount > 0
                         ? `${pendingReviewCount} company(ies) pending`
+                        : "None pending"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/admin/campaigns/pending">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 hover:shadow-lg transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                    <Layers className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-MontserratSemiBold text-gray-900">
+                      Review Campaigns
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {pendingProjects.length > 0
+                        ? `${pendingProjects.length} campaign(s) pending`
                         : "None pending"}
                     </p>
                   </div>

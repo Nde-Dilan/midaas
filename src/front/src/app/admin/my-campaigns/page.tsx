@@ -16,6 +16,7 @@ import Project from "@/entities/project/project";
 import { useCampaignsStore } from "@/store/campaigns";
 import { ModalNames, useModalStore } from "@/store/modal";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Eye,
@@ -27,6 +28,7 @@ import {
 } from "lucide-react";
 
 export default function MyCampaignsPage() {
+  const router = useRouter();
   useGetCampaigns({ page: 1 });
 
   const { campaigns, count } = useCampaignsStore();
@@ -72,14 +74,11 @@ export default function MyCampaignsPage() {
   };
 
   const handleEdit = (campaign: Project) => {
-    openModal({
-      name: ModalNames.EDIT_CAMPAIGN,
-      data: { campaign, type: "edit" },
-    });
+    router.push(`/admin/my-campaigns/edit/${campaign.id}`);
   };
 
   const handleAddCampaign = () => {
-    openModal({ name: ModalNames.ADD_CAMPAIGN });
+    router.push("/admin/my-campaigns/new");
   };
 
   // Summary stats

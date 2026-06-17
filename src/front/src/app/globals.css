@@ -1,17 +1,4 @@
-@font-face {
-  font-family: "Montserrat-Regular";
-  src: url("../assets/fonts/Montserrat-Regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Montserrat-Bold";
-  src: url("../assets/fonts/Montserrat-Bold.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Montserrat-SemiBold";
-  src: url("../assets/fonts/Montserrat-SemiBold.ttf") format("truetype");
-}
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -31,7 +18,7 @@ html {
 }
 
 body {
-  font-family: "Montserrat-Regular", sans-serif;
+  font-family: "Patrick Hand", cursive;
 }
 
 @layer base {

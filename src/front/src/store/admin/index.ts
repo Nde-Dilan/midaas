@@ -4,6 +4,8 @@ import type {
   AdminCompanyItem,
   AdminEntrepreneurItem,
   AdminUserItem,
+  AdminProjectItem,
+  AdminMilestoneItem,
 } from "@/api/admin";
 
 type State = {
@@ -11,13 +13,25 @@ type State = {
   admin: AdminProfile | null;
   loaded: boolean;
 
-  // Data
+  // Companies
   pendingCompanies: AdminCompanyItem[];
   pendingCompaniesLoading: boolean;
+
+  // Entrepreneurs
   entrepreneurs: AdminEntrepreneurItem[];
   entrepreneursLoading: boolean;
+
+  // Users
   users: AdminUserItem[];
   usersLoading: boolean;
+
+  // Projects / Campaigns
+  pendingProjects: AdminProjectItem[];
+  pendingProjectsLoading: boolean;
+
+  // Milestones
+  pendingMilestones: AdminMilestoneItem[];
+  pendingMilestonesLoading: boolean;
 };
 
 type Actions = {
@@ -38,6 +52,16 @@ type Actions = {
   // Users
   setUsers: (users: AdminUserItem[]) => void;
   setUsersLoading: (loading: boolean) => void;
+
+  // Projects
+  setPendingProjects: (projects: AdminProjectItem[]) => void;
+  setPendingProjectsLoading: (loading: boolean) => void;
+  updateProjectStatus: (id: string, status: string) => void;
+
+  // Milestones
+  setPendingMilestones: (milestones: AdminMilestoneItem[]) => void;
+  setPendingMilestonesLoading: (loading: boolean) => void;
+  updateMilestoneStatus: (id: string, status: string) => void;
 };
 
 export const useAdminStore = create<State & Actions>((set) => ({
@@ -50,6 +74,10 @@ export const useAdminStore = create<State & Actions>((set) => ({
   entrepreneursLoading: false,
   users: [],
   usersLoading: false,
+  pendingProjects: [],
+  pendingProjectsLoading: false,
+  pendingMilestones: [],
+  pendingMilestonesLoading: false,
 
   // Auth
   loadAdmin(admin) {
@@ -95,5 +123,35 @@ export const useAdminStore = create<State & Actions>((set) => ({
   },
   setUsersLoading(loading) {
     set({ usersLoading: loading });
+  },
+
+  // Projects
+  setPendingProjects(projects) {
+    set({ pendingProjects: projects, pendingProjectsLoading: false });
+  },
+  setPendingProjectsLoading(loading) {
+    set({ pendingProjectsLoading: loading });
+  },
+  updateProjectStatus(id, status) {
+    set((state) => ({
+      pendingProjects: state.pendingProjects.map((p) =>
+        p.id === id ? { ...p, status } : p,
+      ),
+    }));
+  },
+
+  // Milestones
+  setPendingMilestones(milestones) {
+    set({ pendingMilestones: milestones, pendingMilestonesLoading: false });
+  },
+  setPendingMilestonesLoading(loading) {
+    set({ pendingMilestonesLoading: loading });
+  },
+  updateMilestoneStatus(id, status) {
+    set((state) => ({
+      pendingMilestones: state.pendingMilestones.map((m) =>
+        m.id === id ? { ...m, status } : m,
+      ),
+    }));
   },
 }));
