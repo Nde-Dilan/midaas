@@ -137,7 +137,11 @@ func (h *InvestmentHandler) Invest(w http.ResponseWriter, r *http.Request) {
 		depReq.Payer.Type = "MMO"
 		depReq.Payer.AccountDetails.PhoneNumber = input.PhoneNumber
 		depReq.Payer.AccountDetails.Provider = input.Provider
-		depReq.CustomerMessage = fmt.Sprintf("Invest %s", project.Title[:min(22, len(project.Title))])
+		msg := project.Title
+		if len(msg) > 22 {
+			msg = msg[:22]
+		}
+		depReq.CustomerMessage = msg
 
 		resp, err := h.pawaPay.InitiateDeposit(context.Background(), depReq)
 		if err != nil {
